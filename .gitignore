@@ -1,0 +1,7 @@
+# Binarios y carpetas de compilación
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+
+# Dependencias locales
+packages/
