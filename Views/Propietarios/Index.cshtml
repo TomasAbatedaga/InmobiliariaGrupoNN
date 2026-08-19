@@ -1,0 +1,48 @@
+@model IEnumerable<InmobiliariaGrupoNN.Models.Propietario>
+
+@{
+    ViewData["Title"] = "Listado de Propietarios";
+}
+
+<h1>Listado de Propietarios</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Nuevo Propietario</a>
+</p>
+
+<table class="table table-striped table-hover mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>DNI</th>
+            <th>Nombre Completo</th>
+            <th>Telefono</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>@item.Dni</td>
+                <td>@item.NombreCompleto</td>
+                <td>@item.Telefono</td>
+                <td>@item.Email</td>
+                <td>
+                    @if(item.EstadoActivo)
+                    {
+                        <span class="badge bg-success">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Inactivo</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Editar</a> 
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
