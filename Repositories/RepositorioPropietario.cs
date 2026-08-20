@@ -21,7 +21,7 @@ namespace InmobiliariaGrupoNN.Repositories
 
             using (var connection = new MySqlConnection(_connectionString))
             {
-                string sql = "SELECT Id, Dni, NombreCompleto, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario WHERE EstadoActivo = 1";
+                string sql = "SELECT Id, Dni, Nombre, Apellido, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario WHERE EstadoActivo = 1";
                 
                 using (var command = new MySqlCommand(sql, connection))
                 {
@@ -34,12 +34,13 @@ namespace InmobiliariaGrupoNN.Repositories
                             {
                                 Id = reader.GetInt32(0),
                                 Dni = reader.GetString(1),
-                                NombreCompleto = reader.GetString(2),
-                                Telefono = reader.IsDBNull(3) ? null : reader.GetString(3),
-                                Email = reader.IsDBNull(4) ? null : reader.GetString(4),
-                                EstadoActivo = reader.GetBoolean(5),
-                                FechaAlta = reader.GetDateTime(6),
-                                FechaBaja = reader.IsDBNull(7) ? (DateTime?)null : reader.GetDateTime(7)
+                                Nombre = reader.GetString(2),
+                                Apellido = reader.GetString(3),
+                                Telefono = reader.IsDBNull(4) ? null : reader.GetString(4),
+                                Email = reader.IsDBNull(5) ? null : reader.GetString(5),
+                                EstadoActivo = reader.GetBoolean(6),
+                                FechaAlta = reader.GetDateTime(7),
+                                FechaBaja = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8)
                             });
                         }
                     }
@@ -53,7 +54,7 @@ namespace InmobiliariaGrupoNN.Repositories
             Propietario propietario = null;
             using (var connection = new MySqlConnection(_connectionString))
             {
-                string sql = "SELECT Id, Dni, NombreCompleto, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario WHERE Id = @id";
+                string sql = "SELECT Id, Dni, Nombre, Apellido, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario WHERE Id = @id";
                 
                 using (var command = new MySqlCommand(sql, connection))
                 {
@@ -68,12 +69,13 @@ namespace InmobiliariaGrupoNN.Repositories
                             {
                                 Id = reader.GetInt32(0),
                                 Dni = reader.GetString(1),
-                                NombreCompleto = reader.GetString(2),
-                                Telefono = reader.IsDBNull(3) ? null : reader.GetString(3),
-                                Email = reader.IsDBNull(4) ? null : reader.GetString(4),
-                                EstadoActivo = reader.GetBoolean(5),
-                                FechaAlta = reader.GetDateTime(6),
-                                FechaBaja = reader.IsDBNull(7) ? (DateTime?)null : reader.GetDateTime(7)
+                                Nombre = reader.GetString(2),
+                                Apellido = reader.GetString(3),
+                                Telefono = reader.IsDBNull(4) ? null : reader.GetString(4),
+                                Email = reader.IsDBNull(5) ? null : reader.GetString(5),
+                                EstadoActivo = reader.GetBoolean(6),
+                                FechaAlta = reader.GetDateTime(7),
+                                FechaBaja = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8)
                             };
                         }
                     }
@@ -87,14 +89,15 @@ namespace InmobiliariaGrupoNN.Repositories
             int id = 0;
             using (var connection = new MySqlConnection(_connectionString))
             {
-                string sql = @"INSERT INTO Propietario (Dni, NombreCompleto, Telefono, Email) 
-                               VALUES (@Dni, @NombreCompleto, @Telefono, @Email);
+                string sql = @"INSERT INTO Propietario (Dni, Nombre, Apellido, Telefono, Email) 
+                               VALUES (@Dni, @Nombre, @Apellido, @Telefono, @Email);
                                SELECT LAST_INSERT_ID();";
 
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@Dni", propietario.Dni);
-                    command.Parameters.AddWithValue("@NombreCompleto", propietario.NombreCompleto);
+                    command.Parameters.AddWithValue("@Nombre", propietario.Nombre);
+                    command.Parameters.AddWithValue("@Apellido", propietario.Apellido);
                     command.Parameters.AddWithValue("@Telefono", propietario.Telefono ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Email", propietario.Email ?? (object)DBNull.Value);
 
@@ -111,13 +114,18 @@ namespace InmobiliariaGrupoNN.Repositories
             using (var connection = new MySqlConnection(_connectionString))
             {
                 string sql = @"UPDATE Propietario 
-                               SET Dni = @Dni, NombreCompleto = @NombreCompleto, Telefono = @Telefono, Email = @Email 
+                               SET Dni = @Dni, 
+                               Nombre = @Nombre, 
+                               Apellido = @Apellido, 
+                               Telefono = @Telefono, 
+                               Email = @Email 
                                WHERE Id = @Id";
 
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@Dni", propietario.Dni);
-                    command.Parameters.AddWithValue("@NombreCompleto", propietario.NombreCompleto);
+                    command.Parameters.AddWithValue("@Nombre", propietario.Nombre);
+                    command.Parameters.AddWithValue("@Apellido", propietario.Apellido);
                     command.Parameters.AddWithValue("@Telefono", propietario.Telefono ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Email", propietario.Email ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Id", propietario.Id);

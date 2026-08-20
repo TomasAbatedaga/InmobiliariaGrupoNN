@@ -19,7 +19,7 @@ namespace InmobiliariaGrupoNN.Repositories
 
             using var connection = new MySqlConnection(connectionString);
 
-            var sql = @"SELECT Id, Dni, NombreCompleto, Telefono, Email,
+            var sql = @"SELECT Id, Dni, Nombre, Apellido, Telefono, Email,
                                EstadoActivo, FechaAlta, FechaBaja
                         FROM Inquilino
                         WHERE EstadoActivo = 1";
@@ -36,7 +36,8 @@ namespace InmobiliariaGrupoNN.Repositories
                 {
                     Id = reader.GetInt32("Id"),
                     Dni = reader.GetString("Dni"),
-                    NombreCompleto = reader.GetString("NombreCompleto"),
+                    Nombre = reader.GetString("Nombre"),
+                    Apellido = reader.GetString("Apellido"),
 
                     Telefono = reader.IsDBNull(reader.GetOrdinal("Telefono"))
                         ? null
@@ -64,7 +65,7 @@ namespace InmobiliariaGrupoNN.Repositories
 
             using var connection = new MySqlConnection(connectionString);
 
-            var sql = @"SELECT Id, Dni, NombreCompleto, Telefono, Email,
+            var sql = @"SELECT Id, Dni, Nombre, Apellido, Telefono, Email,
                                EstadoActivo, FechaAlta, FechaBaja
                         FROM Inquilino
                         WHERE Id = @id";
@@ -83,7 +84,8 @@ namespace InmobiliariaGrupoNN.Repositories
                 {
                     Id = reader.GetInt32("Id"),
                     Dni = reader.GetString("Dni"),
-                    NombreCompleto = reader.GetString("NombreCompleto"),
+                    Nombre = reader.GetString("Nombre"),
+                    Apellido = reader.GetString("Apellido"),
 
                     Telefono = reader.IsDBNull(reader.GetOrdinal("Telefono"))
                         ? null
@@ -110,14 +112,15 @@ namespace InmobiliariaGrupoNN.Repositories
             using var connection = new MySqlConnection(connectionString);
 
             var sql = @"INSERT INTO Inquilino
-                        (Dni, NombreCompleto, Telefono, Email)
+                        (Dni, Nombre, Apellido, Telefono, Email)
                         VALUES
-                        (@dni, @nombreCompleto, @telefono, @email)";
+                        (@dni, @nombre, @Apellido, @telefono, @email)";
 
             using var command = new MySqlCommand(sql, connection);
 
             command.Parameters.AddWithValue("@dni", inquilino.Dni);
-            command.Parameters.AddWithValue("@nombreCompleto", inquilino.NombreCompleto);
+            command.Parameters.AddWithValue("@nombre", inquilino.Nombre);
+            command.Parameters.AddWithValue("@apellido", inquilino.Apellido);
             command.Parameters.AddWithValue("@telefono", inquilino.Telefono);
             command.Parameters.AddWithValue("@email", inquilino.Email);
 
@@ -132,7 +135,8 @@ namespace InmobiliariaGrupoNN.Repositories
 
             var sql = @"UPDATE Inquilino
                         SET Dni = @dni,
-                            NombreCompleto = @nombreCompleto,
+                            Nombre = @nombre,
+                            Apellido = @apellido,
                             Telefono = @telefono,
                             Email = @email
                         WHERE Id = @id";
@@ -141,7 +145,8 @@ namespace InmobiliariaGrupoNN.Repositories
 
             command.Parameters.AddWithValue("@id", inquilino.Id);
             command.Parameters.AddWithValue("@dni", inquilino.Dni);
-            command.Parameters.AddWithValue("@nombreCompleto", inquilino.NombreCompleto);
+            command.Parameters.AddWithValue("@nombre", inquilino.Nombre);
+            command.Parameters.AddWithValue("@apellido", inquilino.Apellido);
             command.Parameters.AddWithValue("@telefono", inquilino.Telefono);
             command.Parameters.AddWithValue("@email", inquilino.Email);
 

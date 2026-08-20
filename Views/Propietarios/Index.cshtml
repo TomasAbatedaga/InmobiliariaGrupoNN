@@ -14,7 +14,8 @@
     <thead class="table-dark">
         <tr>
             <th>DNI</th>
-            <th>Nombre Completo</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
             <th>Telefono</th>
             <th>Email</th>
             <th>Estado</th>
@@ -22,14 +23,15 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model) {
+        @foreach (var propietario in Model) {
             <tr>
-                <td>@item.Dni</td>
-                <td>@item.NombreCompleto</td>
-                <td>@item.Telefono</td>
-                <td>@item.Email</td>
+                <td>@propietario.Dni</td>
+                <td>@propietario.Nombre</td>
+                <td>@propietario.Apellido</td>
+                <td>@propietario.Telefono</td>
+                <td>@propietario.Email</td>
                 <td>
-                    @if(item.EstadoActivo)
+                    @if(propietario.EstadoActivo)
                     {
                         <span class="badge bg-success">Activo</span>
                     }
@@ -39,8 +41,8 @@
                     }
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Editar</a> 
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Eliminar</a>
+                    <a asp-action="Edit" asp-route-id="@propietario.Id" class="btn btn-warning btn-sm">Editar</a> 
+                    <a asp-action="Delete" asp-route-id="@propietario.Id" class="btn btn-danger btn-sm">Eliminar</a>
                 </td>
             </tr>
         }

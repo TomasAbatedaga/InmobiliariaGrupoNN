@@ -4,7 +4,8 @@ USE InmobiliariaNN;
 CREATE TABLE IF NOT EXISTS Propietario (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Dni VARCHAR(20) NOT NULL UNIQUE,
-    NombreCompleto VARCHAR(150) NOT NULL,
+    Nombre VARCHAR(75) NOT NULL,
+    Apellido VARCHAR(75) NOT NULL,
     Telefono VARCHAR(50),
     Email VARCHAR(100),
     EstadoActivo BOOLEAN DEFAULT TRUE,
@@ -15,7 +16,8 @@ CREATE TABLE IF NOT EXISTS Propietario (
 CREATE TABLE IF NOT EXISTS Inquilino (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Dni VARCHAR(20) NOT NULL UNIQUE,
-    NombreCompleto VARCHAR(150) NOT NULL,
+    Nombre VARCHAR(75) NOT NULL,
+    Apellido VARCHAR(75) NOT NULL,
     Telefono VARCHAR(50),
     Email VARCHAR(100),
     EstadoActivo BOOLEAN DEFAULT TRUE,
@@ -23,14 +25,14 @@ CREATE TABLE IF NOT EXISTS Inquilino (
     FechaBaja DATETIME NULL
 );
 
-INSERT INTO Propietario (Dni, NombreCompleto, Telefono, Email) 
+INSERT INTO Propietario (Dni, Nombre, Apellido, Telefono, Email) 
 VALUES 
-('11111', 'Carlos Gomez', '2664111111', 'carlos.gomez@email.com'),
-('22222', 'Maria Rodriguez', '2664222222', 'maria.rod@email.com'),
-('33333', 'Tomas Abatedaga', '2664123456', 'abatedagatomas@email.com');
+('11111', 'Carlos', 'Gomez', '2664111111', 'carlos.gomez@gmail.com'),
+('22222', 'Maria', 'Rodriguez', '2664222222', 'maria.rod@gmail.com'),
+('33333', 'Tomas', 'Abatedaga', '2664123456', 'abatedagatomas@gmail.com');
 
-INSERT INTO Inquilino (Dni, NombreCompleto, Telefono, Email) 
+INSERT INTO Inquilino (Dni, Nombre, Apellido, Telefono, Email) 
 VALUES 
-('77777', 'Juan Perez', '2664333333', 'jperez@email.com'),
-('66666', 'Ana Lopez', '2664444444', 'analopez@email.com'),
-('55555', 'Facundo Calderon', '2664555555', 'facucal@email.com');
+('77777', 'Juan', 'Perez', '2664333333', 'jperez@gmail.com'),
+('66666', 'Ana', 'Lopez', '2664444444', 'analopez@gmail.com'),
+('55555', 'Facundo', 'Calderon', '2664555555', 'facucal@gmail.com');
