@@ -18,6 +18,7 @@
             <th>Apellido</th>
             <th>Telefono</th>
             <th>Email</th>
+            <th>Alta</th>
             <th>Estado</th>
             <th>Acciones</th>
         </tr>
@@ -30,6 +31,7 @@
                 <td>@propietario.Apellido</td>
                 <td>@propietario.Telefono</td>
                 <td>@propietario.Email</td>
+                <td>@propietario.FechaAlta.ToString("dd/MM/yyyy")</td>
                 <td>
                     @if(propietario.EstadoActivo)
                     {
@@ -37,7 +39,9 @@
                     }
                     else
                     {
-                        <span class="badge bg-danger">Inactivo</span>
+                        <span class="badge bg-danger">
+                            Inactivo desde @(propietario.FechaBaja?.ToString("dd/MM/yyyy") ?? "-")
+                        </span>
                     }
                 </td>
                 <td>

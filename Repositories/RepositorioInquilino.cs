@@ -21,8 +21,7 @@ namespace InmobiliariaGrupoNN.Repositories
 
             var sql = @"SELECT Id, Dni, Nombre, Apellido, Telefono, Email,
                                EstadoActivo, FechaAlta, FechaBaja
-                        FROM Inquilino
-                        WHERE EstadoActivo = 1";
+                        FROM Inquilino";
 
             using var command = new MySqlCommand(sql, connection);
 

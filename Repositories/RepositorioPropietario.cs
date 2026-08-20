@@ -21,7 +21,7 @@ namespace InmobiliariaGrupoNN.Repositories
 
             using (var connection = new MySqlConnection(_connectionString))
             {
-                string sql = "SELECT Id, Dni, Nombre, Apellido, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario WHERE EstadoActivo = 1";
+                string sql = "SELECT Id, Dni, Nombre, Apellido, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario";
                 
                 using (var command = new MySqlCommand(sql, connection))
                 {
