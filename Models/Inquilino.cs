@@ -12,6 +12,7 @@ namespace InmobiliariaGrupoNN.Models
 
         [Required]
         public string? Nombre { get; set; } = "";
+        [Required]
         public string? Apellido { get; set; } = "";
 
         public string? Telefono { get; set; }

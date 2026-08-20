@@ -12,7 +12,7 @@ namespace InmobiliariaGrupoNN.Repositories
 
         public RepositorioPropietario(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? String.Empty;
         }
 
         public IList<Propietario> ObtenerTodos()
@@ -49,9 +49,9 @@ namespace InmobiliariaGrupoNN.Repositories
             return propietarios;
         }
 
-        public Propietario ObtenerPorId(int id)
+        public Propietario? ObtenerPorId(int id)
         {
-            Propietario propietario = null;
+            Propietario? propietario = null;
             using (var connection = new MySqlConnection(_connectionString))
             {
                 string sql = "SELECT Id, Dni, Nombre, Apellido, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario WHERE Id = @id";
