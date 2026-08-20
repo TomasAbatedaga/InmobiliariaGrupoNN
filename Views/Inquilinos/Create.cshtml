@@ -1,0 +1,79 @@
+@model InmobiliariaGrupoNN.Models.Inquilino
+
+@{
+    ViewData["Title"] = "Nuevo Inquilino";
+}
+
+<h1>Nuevo Inquilino</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <form asp-action="Create" method="post">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Dni" class="form-label"></label>
+                <input asp-for="Dni" class="form-control" />
+                <span asp-validation-for="Dni"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NombreCompleto"
+                       class="form-label">
+                    Nombre Completo
+                </label>
+
+                <input asp-for="NombreCompleto"
+                       class="form-control" />
+
+                <span asp-validation-for="NombreCompleto"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Telefono"
+                       class="form-label">
+                    Teléfono
+                </label>
+
+                <input asp-for="Telefono"
+                       class="form-control" />
+
+                <span asp-validation-for="Telefono"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email"
+                       class="form-label"></label>
+
+                <input asp-for="Email"
+                       class="form-control" />
+
+                <span asp-validation-for="Email"
+                      class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Guardar
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary">
+                Volver
+            </a>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

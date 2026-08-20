@@ -1,0 +1,61 @@
+@model InmobiliariaGrupoNN.Models.Inquilino
+
+@{
+    ViewData["Title"] = "Eliminar Inquilino";
+}
+
+<h1>Eliminar Inquilino</h1>
+
+<h3>¿Está seguro de que desea eliminar este inquilino?</h3>
+
+<hr />
+
+<dl class="row">
+
+    <dt class="col-sm-3">
+        DNI
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Dni
+    </dd>
+
+    <dt class="col-sm-3">
+        Nombre Completo
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.NombreCompleto
+    </dd>
+
+    <dt class="col-sm-3">
+        Teléfono
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Telefono
+    </dd>
+
+    <dt class="col-sm-3">
+        Email
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Email
+    </dd>
+
+</dl>
+
+<form asp-action="Delete"
+      asp-route-id="@Model.Id"
+      method="post">
+
+    <button type="submit" class="btn btn-danger">
+        Eliminar
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Cancelar
+    </a>
+
+</form>

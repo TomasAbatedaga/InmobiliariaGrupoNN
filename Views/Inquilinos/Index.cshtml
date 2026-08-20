@@ -1,0 +1,51 @@
+@model IEnumerable<InmobiliariaGrupoNN.Models.Inquilino>
+
+@{
+    ViewData["Title"] = "Inquilinos";
+}
+
+<h1>Inquilinos</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Nuevo Inquilino</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>DNI</th>
+            <th>Nombre Completo</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Fecha de Alta</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var inquilino in Model)
+        {
+            <tr>
+                <td>@inquilino.Dni</td>
+                <td>@inquilino.NombreCompleto</td>
+                <td>@inquilino.Telefono</td>
+                <td>@inquilino.Email</td>
+                <td>@inquilino.FechaAlta.ToString("dd/MM/yyyy")</td>
+
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@inquilino.Id"
+                       class="btn btn-warning btn-sm">
+                        Editar
+                    </a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@inquilino.Id"
+                       class="btn btn-danger btn-sm">
+                        Eliminar
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
