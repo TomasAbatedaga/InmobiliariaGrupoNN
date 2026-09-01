@@ -14,10 +14,12 @@ namespace InmobiliariaGrupoNN.Controllers
         }
 
         // GET: TipoInmuebles
-        public IActionResult Index(int pagina = 1)
+        public IActionResult Index(int pagina = 1, int tamanio = 10)
         {
             ViewBag.PaginaActual = pagina; 
-            var lista = _repo.ObtenerTodos(pagina, 10);
+            ViewBag.TamanioPagina = tamanio;
+
+            var lista = _repo.ObtenerTodos(pagina, tamanio);
             return View(lista);
         }
 
