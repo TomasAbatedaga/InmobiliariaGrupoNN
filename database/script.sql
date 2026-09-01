@@ -36,3 +36,30 @@ VALUES
 ('77777', 'Juan', 'Perez', '2664333333', 'jperez@gmail.com'),
 ('66666', 'Ana', 'Lopez', '2664444444', 'analopez@gmail.com'),
 ('55555', 'Facundo', 'Calderon', '2664555555', 'facucal@gmail.com');
+
+CREATE TABLE IF NOT EXISTS TipoInmueble (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Inmueble (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Direccion VARCHAR(100) NOT NULL,
+    Ambientes INT NOT NULL,
+    Precio DECIMAL(10,2) NOT NULL,
+    PropietarioId INT NOT NULL,
+    TipoInmuebleId INT NOT NULL,
+    FOREIGN KEY (PropietarioId) REFERENCES Propietario(Id),
+    FOREIGN KEY (TipoInmuebleId) REFERENCES TipoInmueble(Id)
+);
+
+CREATE TABLE IF NOT EXISTS Reserva (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    InmuebleId INT NOT NULL,
+    InquilinoId INT NOT NULL,
+    FechaInicio DATE NOT NULL,
+    FechaFin DATE NOT NULL,
+    Monto DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (InmuebleId) REFERENCES Inmueble(Id),
+    FOREIGN KEY (InquilinoId) REFERENCES Inquilino(Id)
+);
