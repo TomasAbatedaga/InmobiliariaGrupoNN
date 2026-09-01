@@ -46,11 +46,22 @@ CREATE TABLE IF NOT EXISTS Inmueble (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Direccion VARCHAR(100) NOT NULL,
     Ambientes INT NOT NULL,
-    Precio DECIMAL(10,2) NOT NULL,
+    Cupo INT NOT NULL,
+    PrecioPorDia DECIMAL(10,2) NOT NULL,
+    Latitud DECIMAL(10,7) NOT NULL,
+    Longitud DECIMAL(10,7) NOT NULL,
+    PorcentajeReserva DECIMAL(5,2) NOT NULL,
+    Disponible BOOLEAN DEFAULT TRUE,
+    EstadoActivo BOOLEAN DEFAULT TRUE,
+    FechaBaja DATETIME NULL,
     PropietarioId INT NOT NULL,
     TipoInmuebleId INT NOT NULL,
-    FOREIGN KEY (PropietarioId) REFERENCES Propietario(Id),
-    FOREIGN KEY (TipoInmuebleId) REFERENCES TipoInmueble(Id)
+
+    FOREIGN KEY (PropietarioId)
+        REFERENCES Propietario(Id),
+
+    FOREIGN KEY (TipoInmuebleId)
+        REFERENCES TipoInmueble(Id)
 );
 
 CREATE TABLE IF NOT EXISTS Reserva (
