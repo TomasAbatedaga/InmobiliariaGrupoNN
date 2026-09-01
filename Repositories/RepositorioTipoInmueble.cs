@@ -10,13 +10,10 @@ namespace InmobiliariaGrupoNN.Repositories
     {
         private readonly string _connectionString;
 
-        public RepositorioTipoInmueble(string connectionString)
+        public RepositorioTipoInmueble(IConfiguration configuration)
         {
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new ArgumentException("La cadena de conexion no puede estar vacia.");
-            }
-            _connectionString = connectionString;
+            _connectionString = configuration.GetConnectionString("DefaultConnection") 
+                ?? throw new ArgumentException("No se encontro la cadena de conexion en el appsettings.");
         }
 
         public IList<TipoInmueble> ObtenerTodos(int numeroPagina = 1, int tamanio = 10)
