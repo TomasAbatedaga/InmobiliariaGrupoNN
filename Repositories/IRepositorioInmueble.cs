@@ -1,5 +1,4 @@
 using InmobiliariaGrupoNN.Models;
-using System.Collections.Generic;
 
 namespace InmobiliariaGrupoNN.Repositories
 {
@@ -14,5 +13,7 @@ namespace InmobiliariaGrupoNN.Repositories
         int Modificacion(Inmueble inmueble);
 
         int Baja(int id);
+
+        int ModificarPortada(int id, string? ruta);
     }
 }

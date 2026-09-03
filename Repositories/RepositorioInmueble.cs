@@ -1,8 +1,5 @@
-using InmobiliariaGrupoNN.Models;
-using Microsoft.Extensions.Configuration;
+ using InmobiliariaGrupoNN.Models;
 using MySqlConnector;
-using System;
-using System.Collections.Generic;
 
 namespace InmobiliariaGrupoNN.Repositories
 {
@@ -18,8 +15,6 @@ namespace InmobiliariaGrupoNN.Repositories
                     "No se encontró la cadena de conexión DefaultConnection");
         }
 
-
-        
         public IList<Inmueble> ObtenerTodos()
         {
             var inmuebles = new List<Inmueble>();
@@ -39,6 +34,7 @@ namespace InmobiliariaGrupoNN.Repositories
                         i.Disponible,
                         i.EstadoActivo,
                         i.FechaBaja,
+                        i.Portada,
                         i.PropietarioId,
                         i.TipoInmuebleId,
                         p.Nombre,
@@ -69,8 +65,6 @@ namespace InmobiliariaGrupoNN.Repositories
             return inmuebles;
         }
 
-
-        
         public Inmueble? ObtenerPorId(int id)
         {
             Inmueble? inmueble = null;
@@ -90,6 +84,7 @@ namespace InmobiliariaGrupoNN.Repositories
                         i.Disponible,
                         i.EstadoActivo,
                         i.FechaBaja,
+                        i.Portada,
                         i.PropietarioId,
                         i.TipoInmuebleId,
                         p.Nombre,
@@ -100,11 +95,11 @@ namespace InmobiliariaGrupoNN.Repositories
                         ON i.PropietarioId = p.Id
                     INNER JOIN TipoInmueble t
                         ON i.TipoInmuebleId = t.Id
-                    WHERE i.Id = @id";
+                    WHERE i.Id = @Id";
 
                 using (var command = new MySqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("@Id", id);
 
                     connection.Open();
 
@@ -121,11 +116,9 @@ namespace InmobiliariaGrupoNN.Repositories
             return inmueble;
         }
 
-
-       
         public int Alta(Inmueble inmueble)
         {
-            int id = 0;
+            int id;
 
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -204,17 +197,17 @@ namespace InmobiliariaGrupoNN.Repositories
                     connection.Open();
 
                     id = Convert.ToInt32(command.ExecuteScalar());
+
+                    inmueble.Id = id;
                 }
             }
 
             return id;
         }
 
-
-      
         public int Modificacion(Inmueble inmueble)
         {
-            int filasAfectadas = 0;
+            int filasAfectadas;
 
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -288,11 +281,9 @@ namespace InmobiliariaGrupoNN.Repositories
             return filasAfectadas;
         }
 
-
-      
         public int Baja(int id)
         {
-            int filasAfectadas = 0;
+            int filasAfectadas;
 
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -301,11 +292,11 @@ namespace InmobiliariaGrupoNN.Repositories
                     SET
                         EstadoActivo = 0,
                         FechaBaja = CURRENT_TIMESTAMP
-                    WHERE Id = @id";
+                    WHERE Id = @Id";
 
                 using (var command = new MySqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("@Id", id);
 
                     connection.Open();
 
@@ -316,8 +307,36 @@ namespace InmobiliariaGrupoNN.Repositories
             return filasAfectadas;
         }
 
+        public int ModificarPortada(int id, string? ruta)
+        {
+            int filasAfectadas;
 
-        
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                string sql = @"
+                    UPDATE Inmueble
+                    SET Portada = @Portada
+                    WHERE Id = @Id";
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue(
+                        "@Portada",
+                        string.IsNullOrEmpty(ruta)
+                            ? DBNull.Value
+                            : ruta);
+
+                    command.Parameters.AddWithValue("@Id", id);
+
+                    connection.Open();
+
+                    filasAfectadas = command.ExecuteNonQuery();
+                }
+            }
+
+            return filasAfectadas;
+        }
+
         private Inmueble MapearInmueble(MySqlDataReader reader)
         {
             return new Inmueble
@@ -346,21 +365,25 @@ namespace InmobiliariaGrupoNN.Repositories
                     ? null
                     : reader.GetDateTime(10),
 
-                PropietarioId = reader.GetInt32(11),
+                Portada = reader.IsDBNull(11)
+                    ? null
+                    : reader.GetString(11),
 
-                TipoInmuebleId = reader.GetInt32(12),
+                PropietarioId = reader.GetInt32(12),
+
+                TipoInmuebleId = reader.GetInt32(13),
 
                 Propietario = new Propietario
                 {
-                    Id = reader.GetInt32(11),
-                    Nombre = reader.GetString(13),
-                    Apellido = reader.GetString(14)
+                    Id = reader.GetInt32(12),
+                    Nombre = reader.GetString(14),
+                    Apellido = reader.GetString(15)
                 },
 
                 TipoInmueble = new TipoInmueble
                 {
-                    Id = reader.GetInt32(12),
-                    Nombre = reader.GetString(15)
+                    Id = reader.GetInt32(13),
+                    Nombre = reader.GetString(16)
                 }
             };
         }

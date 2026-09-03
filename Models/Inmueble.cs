@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace InmobiliariaGrupoNN.Models
 {
@@ -38,6 +39,10 @@ namespace InmobiliariaGrupoNN.Models
 
         public DateTime? FechaBaja { get; set; }
 
+        public string? Portada { get; set; }
+
+        public IFormFile? PortadaFile { get; set; }
+
         [Range(1, int.MaxValue,
             ErrorMessage = "Debe seleccionar un propietario.")]
         public int PropietarioId { get; set; }
@@ -49,5 +54,8 @@ namespace InmobiliariaGrupoNN.Models
         public Propietario? Propietario { get; set; }
 
         public TipoInmueble? TipoInmueble { get; set; }
+
+        public IList<Imagen> Imagenes { get; set; }
+            = new List<Imagen>();
     }
 }

@@ -1,0 +1,171 @@
+@model InmobiliariaGrupoNN.Models.Inmueble
+
+@{
+    ViewData["Title"] = "Imágenes del Inmueble";
+}
+
+<h1>Imágenes del Inmueble</h1>
+<h4>@Model.Direccion</h4>
+
+<hr />
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Mensaje"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-6">
+
+        <h4>Foto de Portada</h4>
+
+        @if (!string.IsNullOrEmpty(Model.Portada))
+        {
+            <div class="mb-3">
+                <img src="@Model.Portada"
+                     class="img-thumbnail"
+                     style="max-width: 400px; max-height: 300px;" />
+
+                <form asp-controller="Inmuebles"
+                      asp-action="Portada"
+                      method="post"
+                      class="mt-2">
+
+                    <input type="hidden"
+                           name="InmuebleId"
+                           value="@Model.Id" />
+
+                    <button type="submit"
+                            class="btn btn-danger btn-sm">
+                        Eliminar Portada
+                    </button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">
+                No hay una portada cargada.
+            </p>
+        }
+
+        <form asp-controller="Inmuebles"
+              asp-action="Portada"
+              method="post"
+              enctype="multipart/form-data">
+
+            <input type="hidden"
+                   name="InmuebleId"
+                   value="@Model.Id" />
+
+            <div class="form-group mb-3">
+                <label class="control-label">
+                    Seleccionar imagen de portada
+                </label>
+
+                <input type="file"
+                       name="Archivo"
+                       class="form-control"
+                       accept="image/*"
+                       required />
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Subir Portada
+            </button>
+        </form>
+
+    </div>
+
+    <div class="col-md-6">
+
+        <h4>Galería de Imágenes</h4>
+
+        @if (Model.Imagenes != null && Model.Imagenes.Count > 0)
+        {
+            <div class="d-flex flex-wrap mb-3">
+                @foreach (var imagen in Model.Imagenes)
+                {
+                    <div class="m-2">
+                        <img src="@imagen.Url"
+                             class="img-thumbnail"
+                             style="width: 150px; height: 150px; object-fit: cover;" />
+
+                        <form asp-controller="Imagenes"
+                              asp-action="Eliminar"
+                              method="post"
+                              class="mt-1">
+
+                            <input type="hidden"
+                                   name="id"
+                                   value="@imagen.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-danger btn-sm">
+                                Eliminar
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">
+                No hay imágenes cargadas.
+            </p>
+        }
+
+        <form asp-controller="Imagenes"
+              asp-action="Alta"
+              method="post"
+              enctype="multipart/form-data">
+
+            <input type="hidden"
+                   name="id"
+                   value="@Model.Id" />
+
+            <div class="form-group mb-3">
+                <label class="control-label">
+                    Seleccionar imágenes
+                </label>
+
+                <input type="file"
+                       name="imagenes"
+                       class="form-control"
+                       accept="image/*"
+                       multiple
+                       required />
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Subir Imágenes
+            </button>
+        </form>
+
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Details"
+       asp-route-id="@Model.Id"
+       class="btn btn-info">
+        Ver Detalles
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary ms-2">
+        Volver a la Lista
+    </a>
+</div>
