@@ -1,0 +1,77 @@
+@model InmobiliariaGrupoNN.Models.Inmueble
+
+@{
+    ViewData["Title"] = "Detalles del Inmueble";
+}
+
+<h1>Detalles del Inmueble</h1>
+
+<div>
+    <hr />
+
+    <dl class="row">
+
+        <dt class="col-sm-3">Dirección</dt>
+        <dd class="col-sm-9">@Model.Direccion</dd>
+
+        <dt class="col-sm-3">Ambientes</dt>
+        <dd class="col-sm-9">@Model.Ambientes</dd>
+
+        <dt class="col-sm-3">Cupo Máximo</dt>
+        <dd class="col-sm-9">@Model.Cupo personas</dd>
+
+        <dt class="col-sm-3">Precio por Día</dt>
+        <dd class="col-sm-9">$@Model.PrecioPorDia.ToString("N2")</dd>
+
+        <dt class="col-sm-3">Porcentaje de Reserva</dt>
+        <dd class="col-sm-9">@Model.PorcentajeReserva%</dd>
+
+        <dt class="col-sm-3">Latitud</dt>
+        <dd class="col-sm-9">@Model.Latitud</dd>
+
+        <dt class="col-sm-3">Longitud</dt>
+        <dd class="col-sm-9">@Model.Longitud</dd>
+
+        <dt class="col-sm-3">Propietario</dt>
+        <dd class="col-sm-9">
+            @Model.Propietario?.Nombre
+            @Model.Propietario?.Apellido
+        </dd>
+
+        <dt class="col-sm-3">Tipo de Inmueble</dt>
+        <dd class="col-sm-9">
+            @Model.TipoInmueble?.Nombre
+        </dd>
+
+        <dt class="col-sm-3">Disponibilidad</dt>
+        <dd class="col-sm-9">
+
+            @if (Model.Disponible)
+            {
+                <span class="badge bg-success">
+                    Disponible
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-danger">
+                    No disponible
+                </span>
+            }
+
+        </dd>
+
+    </dl>
+
+    <a asp-action="Edit"
+       asp-route-id="@Model.Id"
+       class="btn btn-warning">
+        Editar
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary ms-2">
+        Volver a la lista
+    </a>
+
+</div>

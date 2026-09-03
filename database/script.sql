@@ -25,18 +25,6 @@ CREATE TABLE IF NOT EXISTS Inquilino (
     FechaBaja DATETIME NULL
 );
 
-INSERT INTO Propietario (Dni, Nombre, Apellido, Telefono, Email) 
-VALUES 
-('11111', 'Carlos', 'Gomez', '2664111111', 'carlos.gomez@gmail.com'),
-('22222', 'Maria', 'Rodriguez', '2664222222', 'maria.rod@gmail.com'),
-('33333', 'Tomas', 'Abatedaga', '2664123456', 'abatedagatomas@gmail.com');
-
-INSERT INTO Inquilino (Dni, Nombre, Apellido, Telefono, Email) 
-VALUES 
-('77777', 'Juan', 'Perez', '2664333333', 'jperez@gmail.com'),
-('66666', 'Ana', 'Lopez', '2664444444', 'analopez@gmail.com'),
-('55555', 'Facundo', 'Calderon', '2664555555', 'facucal@gmail.com');
-
 CREATE TABLE IF NOT EXISTS TipoInmueble (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Nombre VARCHAR(50) NOT NULL
@@ -56,12 +44,8 @@ CREATE TABLE IF NOT EXISTS Inmueble (
     FechaBaja DATETIME NULL,
     PropietarioId INT NOT NULL,
     TipoInmuebleId INT NOT NULL,
-
-    FOREIGN KEY (PropietarioId)
-        REFERENCES Propietario(Id),
-
-    FOREIGN KEY (TipoInmuebleId)
-        REFERENCES TipoInmueble(Id)
+    FOREIGN KEY (PropietarioId) REFERENCES Propietario(Id),
+    FOREIGN KEY (TipoInmuebleId) REFERENCES TipoInmueble(Id)
 );
 
 CREATE TABLE IF NOT EXISTS Reserva (
@@ -74,3 +58,38 @@ CREATE TABLE IF NOT EXISTS Reserva (
     FOREIGN KEY (InmuebleId) REFERENCES Inmueble(Id),
     FOREIGN KEY (InquilinoId) REFERENCES Inquilino(Id)
 );
+
+INSERT INTO Propietario (Dni, Nombre, Apellido, Telefono, Email)
+VALUES
+('11111', 'Carlos', 'Gomez', '2664111111', 'carlos.gomez@gmail.com'),
+('22222', 'Maria', 'Rodriguez', '2664222222', 'maria.rod@gmail.com'),
+('33333', 'Tomas', 'Abatedaga', '2664123456', 'abatedagatomas@gmail.com');
+
+INSERT INTO Inquilino (Dni, Nombre, Apellido, Telefono, Email)
+VALUES
+('77777', 'Juan', 'Perez', '2664333333', 'jperez@gmail.com'),
+('66666', 'Ana', 'Lopez', '2664444444', 'analopez@gmail.com'),
+('55555', 'Facundo', 'Calderon', '2664555555', 'facucal@gmail.com');
+
+INSERT INTO TipoInmueble (Nombre)
+VALUES
+('Casa'),
+('Departamento'),
+('Cabaña'),
+('Local');
+
+INSERT INTO Inmueble (
+    Direccion,
+    Ambientes,
+    Cupo,
+    PrecioPorDia,
+    Latitud,
+    Longitud,
+    PorcentajeReserva,
+    Disponible,
+    PropietarioId,
+    TipoInmuebleId
+)
+VALUES
+('Av. Illia 123', 3, 5, 45000.00, -33.3017000, -66.3378000, 30.00, TRUE, 1, 2),
+('Los Lapachos 450', 4, 6, 60000.00, -33.2905000, -66.3201000, 25.00, TRUE, 2, 1);

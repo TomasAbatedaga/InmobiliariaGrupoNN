@@ -1,0 +1,125 @@
+@model InmobiliariaGrupoNN.Models.Inmueble
+
+@{
+    ViewData["Title"] = "Nuevo Inmueble";
+}
+
+<h1>Nuevo Inmueble</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+
+        <form asp-action="Create">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Direccion" class="control-label">Dirección</label>
+                <input asp-for="Direccion" class="form-control" />
+                <span asp-validation-for="Direccion" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Ambientes" class="control-label">Ambientes</label>
+                <input asp-for="Ambientes" class="form-control" />
+                <span asp-validation-for="Ambientes" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Cupo" class="control-label">Cupo Máximo</label>
+                <input asp-for="Cupo" class="form-control" />
+                <span asp-validation-for="Cupo" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="PrecioPorDia" class="control-label">Precio por Día</label>
+                <input asp-for="PrecioPorDia" class="form-control" />
+                <span asp-validation-for="PrecioPorDia" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Latitud" class="control-label">Latitud</label>
+                <input asp-for="Latitud" class="form-control" />
+                <span asp-validation-for="Latitud" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Longitud" class="control-label">Longitud</label>
+                <input asp-for="Longitud" class="form-control" />
+                <span asp-validation-for="Longitud" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="PorcentajeReserva" class="control-label">
+                    Porcentaje de Reserva
+                </label>
+
+                <input asp-for="PorcentajeReserva" class="form-control" />
+
+                <span asp-validation-for="PorcentajeReserva"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="PropietarioId" class="control-label">
+                    Propietario
+                </label>
+
+                <select asp-for="PropietarioId"
+                        asp-items="ViewBag.Propietarios"
+                        class="form-control">
+
+                    <option value="">Seleccione un propietario</option>
+
+                </select>
+
+                <span asp-validation-for="PropietarioId"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="TipoInmuebleId" class="control-label">
+                    Tipo de Inmueble
+                </label>
+
+                <select asp-for="TipoInmuebleId"
+                        asp-items="ViewBag.TiposInmueble"
+                        class="form-control">
+
+                    <option value="">Seleccione un tipo de inmueble</option>
+
+                </select>
+
+                <span asp-validation-for="TipoInmuebleId"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="Disponible" class="form-check-input" />
+
+                <label asp-for="Disponible" class="form-check-label">
+                    Disponible para alquilar
+                </label>
+            </div>
+
+            <div class="form-group mt-4">
+                <input type="submit"
+                       value="Guardar"
+                       class="btn btn-primary" />
+
+                <a asp-action="Index"
+                   class="btn btn-secondary ms-2">
+                    Volver a la lista
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
