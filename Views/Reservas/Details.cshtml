@@ -1,0 +1,33 @@
+@model InmobiliariaGrupoNN.Models.Reserva
+
+@{
+    ViewData["Title"] = "Detalle de Reserva";
+}
+
+<h2 class="mb-4">Detalles de la Reserva #@Model.Id</h2>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Información Completa</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3 text-muted">Inmueble (Dirección)</dt>
+            <dd class="col-sm-9 fw-bold">@Model.Inmueble?.Direccion</dd>
+
+            <dt class="col-sm-3 text-muted">Inquilino</dt>
+            <dd class="col-sm-9 fw-bold">@Model.Inquilino?.Nombre @Model.Inquilino?.Apellido</dd>
+
+            <dt class="col-sm-3 text-muted">Período</dt>
+            <dd class="col-sm-9">Desde <strong>@Model.FechaInicio.ToString("dd/MM/yyyy")</strong> hasta <strong>@Model.FechaFin.ToString("dd/MM/yyyy")</strong></dd>
+
+            <dt class="col-sm-3 text-muted">Monto Total</dt>
+            <dd class="col-sm-9 text-success fw-bold">$ @Model.Monto.ToString("N2")</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
+</div>

@@ -1,0 +1,28 @@
+@model InmobiliariaGrupoNN.Models.Reserva
+
+@{
+    ViewData["Title"] = "Cancelar Reserva";
+}
+
+<h2 class="text-danger">Cancelar Reserva</h2>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger mb-4">@ViewBag.Error</div>
+}
+
+<h3>¿Confirmás que querés eliminar esta reserva?</h3>
+<hr />
+<dl class="row mb-4">
+    <dt class="col-sm-2">Inmueble</dt>
+    <dd class="col-sm-10">@Model.Inmueble?.Direccion</dd>
+
+    <dt class="col-sm-2">Inquilino</dt>
+    <dd class="col-sm-10">@Model.Inquilino?.Nombre @Model.Inquilino?.Apellido</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <input type="submit" value="Eliminar" class="btn btn-danger" />
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+</form>

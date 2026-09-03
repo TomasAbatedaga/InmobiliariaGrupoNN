@@ -1,0 +1,64 @@
+@model InmobiliariaGrupoNN.Models.Reserva
+
+@{
+    ViewData["Title"] = "Nueva Reserva";
+}
+
+<h2>Nueva Reserva</h2>
+<hr />
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
+<div class="row">
+    <div class="col-md-5">
+        <form asp-action="Create">
+            <div class="form-group mb-3">
+                <label asp-for="InmuebleId" class="control-label fw-bold">Inmueble</label>
+                <select asp-for="InmuebleId" class="form-select" required>
+                    <option value="">Seleccione un inmueble...</option>
+                    @if(ViewBag.Inmuebles != null) {
+                        foreach (var item in ViewBag.Inmuebles) {
+                            <option value="@item.Id">@item.Direccion</option>
+                        }
+                    }
+                </select>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="InquilinoId" class="control-label fw-bold">Inquilino</label>
+                <select asp-for="InquilinoId" class="form-select" required>
+                    <option value="">Seleccione un inquilino...</option>
+                    @if(ViewBag.Inquilinos != null) {
+                        foreach (var item in ViewBag.Inquilinos) {
+                            <option value="@item.Id">@item.Nombre @item.Apellido</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="row mb-3">
+                <div class="form-group col">
+                    <label asp-for="FechaInicio" class="control-label fw-bold">Fecha Inicio</label>
+                    <input asp-for="FechaInicio" type="date" class="form-control" required />
+                </div>
+                <div class="form-group col">
+                    <label asp-for="FechaFin" class="control-label fw-bold">Fecha Fin</label>
+                    <input asp-for="FechaFin" type="date" class="form-control" required />
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="Monto" class="control-label fw-bold">Monto Total</label>
+                <input asp-for="Monto" type="number" step="0.01" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Guardar" class="btn btn-success" />
+                <a asp-action="Index" class="btn btn-secondary ms-2">Volver</a>
+            </div>
+        </form>
+    </div>
+</div>  
