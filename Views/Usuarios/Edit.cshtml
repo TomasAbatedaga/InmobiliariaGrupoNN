@@ -1,0 +1,66 @@
+@model InmobiliariaGrupoNN.Models.Usuario
+
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<h2 class="mb-4">Editar Usuario</h2>
+<hr />
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
+<div class="row">
+    <div class="col-md-5">
+        <form asp-action="Edit" enctype="multipart/form-data">
+            
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Avatar" />
+
+            <div class="row mb-3">
+                <div class="form-group col">
+                    <label asp-for="Nombre" class="control-label fw-bold"></label>
+                    <input asp-for="Nombre" class="form-control" required />
+                </div>
+                <div class="form-group col">
+                    <label asp-for="Apellido" class="control-label fw-bold"></label>
+                    <input asp-for="Apellido" class="form-control" required />
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Email" class="control-label fw-bold"></label>
+                <input asp-for="Email" type="email" class="form-control" required />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Clave" class="control-label fw-bold">Contraseña</label>
+                <input asp-for="Clave" type="text" class="form-control" required />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Rol" class="control-label fw-bold">Rol del Sistema</label>
+                <select asp-for="Rol" asp-items="Html.GetEnumSelectList<InmobiliariaGrupoNN.Models.Rol>()" class="form-select" required></select>
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="control-label fw-bold">Cambiar Foto (Opcional)</label>
+                @if (!string.IsNullOrEmpty(Model.Avatar))
+                {
+                    <div class="mb-2">
+                        <img src="@Model.Avatar" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                        <span class="text-muted ms-2">Foto actual</span>
+                    </div>
+                }
+                <input type="file" name="avatarFile" class="form-control" accept="image/*" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Guardar Cambios" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
+            </div>
+        </form>
+    </div>
+</div>
