@@ -15,8 +15,12 @@ namespace InmobiliariaGrupoNN.Repositories
                     "No se encontró la cadena de conexión DefaultConnection");
         }
 
-        public IList<Inmueble> ObtenerTodos()
+        public IList<Inmueble> ObtenerTodos(int numeroPagina = 1, int tamanio = 10)
         {
+            if (numeroPagina < 1) numeroPagina = 1;
+            if (tamanio < 1) tamanio = 10;
+
+            int offset = (numeroPagina - 1) * tamanio;
             var inmuebles = new List<Inmueble>();
 
             using (var connection = new MySqlConnection(_connectionString))
@@ -46,10 +50,14 @@ namespace InmobiliariaGrupoNN.Repositories
                     INNER JOIN TipoInmueble t
                         ON i.TipoInmuebleId = t.Id
                     WHERE i.EstadoActivo = 1
-                    ORDER BY i.Id";
+                    ORDER BY i.Id
+                    LIMIT @tamanio OFFSET @offset";
 
                 using (var command = new MySqlCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@tamanio", tamanio);
+                    command.Parameters.AddWithValue("@offset", offset);
+
                     connection.Open();
 
                     using (var reader = command.ExecuteReader())

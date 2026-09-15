@@ -4,7 +4,7 @@ namespace InmobiliariaGrupoNN.Repositories
 {
     public interface IRepositorioInquilino
     {
-        IList<Inquilino> ObtenerTodos();
+        IList<Inquilino> ObtenerTodos(int numeroPagina = 1, int tamanio = 10);
 
         Inquilino? ObtenerPorId(int id);
 

@@ -13,46 +13,57 @@ namespace InmobiliariaGrupoNN.Repositories
                 .GetConnectionString("DefaultConnection")!;
         }
 
-        public IList<Inquilino> ObtenerTodos()
+        public IList<Inquilino> ObtenerTodos(int numeroPagina = 1, int tamanio = 10)
         {
+            if (numeroPagina < 1) numeroPagina = 1;
+            if (tamanio < 1) tamanio = 10;
+
+            int offset = (numeroPagina - 1) * tamanio;
             var lista = new List<Inquilino>();
 
-            using var connection = new MySqlConnection(connectionString);
-
-            var sql = @"SELECT Id, Dni, Nombre, Apellido, Telefono, Email,
-                               EstadoActivo, FechaAlta, FechaBaja
-                        FROM Inquilino";
-
-            using var command = new MySqlCommand(sql, connection);
-
-            connection.Open();
-
-            using var reader = command.ExecuteReader();
-
-            while (reader.Read())
+            using (var connection = new MySqlConnection(connectionString))
             {
-                lista.Add(new Inquilino
+                var sql = @"SELECT Id, Dni, Nombre, Apellido, Telefono, Email,
+                                EstadoActivo, FechaAlta, FechaBaja
+                            FROM Inquilino
+                            LIMIT @tamanio OFFSET @offset";
+
+                using (var command = new MySqlCommand(sql, connection))
                 {
-                    Id = reader.GetInt32("Id"),
-                    Dni = reader.GetString("Dni"),
-                    Nombre = reader.GetString("Nombre"),
-                    Apellido = reader.GetString("Apellido"),
+                    command.Parameters.AddWithValue("@tamanio", tamanio);
+                    command.Parameters.AddWithValue("@offset", offset);
 
-                    Telefono = reader.IsDBNull(reader.GetOrdinal("Telefono"))
-                        ? null
-                        : reader.GetString("Telefono"),
+                    connection.Open();
 
-                    Email = reader.IsDBNull(reader.GetOrdinal("Email"))
-                        ? null
-                        : reader.GetString("Email"),
-
-                    EstadoActivo = reader.GetBoolean("EstadoActivo"),
-                    FechaAlta = reader.GetDateTime("FechaAlta"),
-
-                    FechaBaja = reader.IsDBNull(reader.GetOrdinal("FechaBaja"))
-                        ? null
-                        : reader.GetDateTime("FechaBaja")
-                });
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new Inquilino
+                            {
+                                Id = reader.GetInt32("Id"),
+                                Dni = reader.GetString("Dni"),
+                                Nombre = reader.GetString("Nombre"),
+                                Apellido = reader.GetString("Apellido"),
+                                
+                                Telefono = reader.IsDBNull(reader.GetOrdinal("Telefono"))
+                                    ? null
+                                    : reader.GetString("Telefono"),
+                                    
+                                Email = reader.IsDBNull(reader.GetOrdinal("Email"))
+                                    ? null
+                                    : reader.GetString("Email"),
+                                    
+                                EstadoActivo = reader.GetBoolean("EstadoActivo"),
+                                FechaAlta = reader.GetDateTime("FechaAlta"),
+                                
+                                FechaBaja = reader.IsDBNull(reader.GetOrdinal("FechaBaja"))
+                                    ? null
+                                    : reader.GetDateTime("FechaBaja")
+                            });
+                        }
+                    }
+                }
             }
 
             return lista;

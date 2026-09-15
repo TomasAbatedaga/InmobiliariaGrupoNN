@@ -15,16 +15,24 @@ namespace InmobiliariaGrupoNN.Repositories
             _connectionString = configuration.GetConnectionString("DefaultConnection") ?? String.Empty;
         }
 
-        public IList<Propietario> ObtenerTodos()
+        public IList<Propietario> ObtenerTodos(int numeroPagina = 1, int tamanio = 10)
         {
+            if (numeroPagina < 1) numeroPagina = 1;
+            if (tamanio < 1) tamanio = 10;
+
+            int offset = (numeroPagina - 1) * tamanio;
             var propietarios = new List<Propietario>();
 
             using (var connection = new MySqlConnection(_connectionString))
             {
-                string sql = "SELECT Id, Dni, Nombre, Apellido, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario";
+                string sql = "SELECT Id, Dni, Nombre, Apellido, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario LIMIT @tamanio OFFSET @offset";
                 
                 using (var command = new MySqlCommand(sql, connection))
                 {
+                    // Agregamos los parámetros acá
+                    command.Parameters.AddWithValue("@tamanio", tamanio);
+                    command.Parameters.AddWithValue("@offset", offset);
+
                     connection.Open();
                     using (var reader = command.ExecuteReader())
                     {
