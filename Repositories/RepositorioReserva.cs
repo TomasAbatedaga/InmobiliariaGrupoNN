@@ -29,7 +29,7 @@ namespace InmobiliariaGrupoNN.Repositories
                 using (var connection = new MySqlConnection(_connectionString))
                 {
                     string sql = @"
-                        SELECT r.Id, r.InmuebleId, r.InquilinoId, r.FechaInicio, r.FechaFin, r.Monto,
+                        SELECT r.Id, r.InmuebleId, r.InquilinoId, r.FechaInicio, r.FechaFin, r.MontoPorDia,
                                i.Direccion,
                                inq.Nombre AS NombreInquilino, inq.Apellido AS ApellidoInquilino
                         FROM Reserva r
@@ -54,7 +54,7 @@ namespace InmobiliariaGrupoNN.Repositories
                                     InquilinoId = reader.GetInt32(2),
                                     FechaInicio = reader.GetDateTime(3),
                                     FechaFin = reader.GetDateTime(4),
-                                    Monto = reader.GetDecimal(5),
+                                    MontoPorDia = reader.GetDecimal(5),
                                     Inmueble = new Inmueble { Direccion = reader.GetString(6) },
                                     Inquilino = new Inquilino 
                                     { 
@@ -86,7 +86,7 @@ namespace InmobiliariaGrupoNN.Repositories
                 using (var connection = new MySqlConnection(_connectionString))
                 {
                     string sql = @"
-                        SELECT r.Id, r.InmuebleId, r.InquilinoId, r.FechaInicio, r.FechaFin, r.Monto,
+                        SELECT r.Id, r.InmuebleId, r.InquilinoId, r.FechaInicio, r.FechaFin, r.MontoPorDia,
                                i.Direccion,
                                inq.Nombre AS NombreInquilino, inq.Apellido AS ApellidoInquilino
                         FROM Reserva r
@@ -109,7 +109,7 @@ namespace InmobiliariaGrupoNN.Repositories
                                     InquilinoId = reader.GetInt32(2),
                                     FechaInicio = reader.GetDateTime(3),
                                     FechaFin = reader.GetDateTime(4),
-                                    Monto = reader.GetDecimal(5),
+                                    MontoPorDia = reader.GetDecimal(5),
                                     Inmueble = new Inmueble { Direccion = reader.GetString(6) },
                                     Inquilino = new Inquilino 
                                     { 
@@ -133,14 +133,15 @@ namespace InmobiliariaGrupoNN.Repositories
         public int Alta(Reserva reserva)
         {
             ValidarReserva(reserva);
+            ValidarDisponibilidad(reserva);
 
             int res = -1;
             try
             {
                 using (var connection = new MySqlConnection(_connectionString))
                 {
-                    string sql = @"INSERT INTO Reserva (InmuebleId, InquilinoId, FechaInicio, FechaFin, Monto) 
-                                   VALUES (@inmuebleId, @inquilinoId, @fechaInicio, @fechaFin, @monto); 
+                    string sql = @"INSERT INTO Reserva (InmuebleId, InquilinoId, FechaInicio, FechaFin, MontoPorDia) 
+                                   VALUES (@inmuebleId, @inquilinoId, @fechaInicio, @fechaFin, @montoPorDia); 
                                    SELECT LAST_INSERT_ID();";
                     using (var command = new MySqlCommand(sql, connection))
                     {
@@ -148,7 +149,7 @@ namespace InmobiliariaGrupoNN.Repositories
                         command.Parameters.AddWithValue("@inquilinoId", reserva.InquilinoId);
                         command.Parameters.AddWithValue("@fechaInicio", reserva.FechaInicio);
                         command.Parameters.AddWithValue("@fechaFin", reserva.FechaFin);
-                        command.Parameters.AddWithValue("@monto", reserva.Monto);
+                        command.Parameters.AddWithValue("@montoPorDia", reserva.MontoPorDia);
                         
                         connection.Open();
                         res = Convert.ToInt32(command.ExecuteScalar());
@@ -167,6 +168,7 @@ namespace InmobiliariaGrupoNN.Repositories
         {
             if (reserva.Id <= 0) throw new ArgumentException("ID de reserva inválido para modificación.");
             ValidarReserva(reserva);
+            ValidarDisponibilidad(reserva);
 
             int res = -1;
             try
@@ -175,7 +177,7 @@ namespace InmobiliariaGrupoNN.Repositories
                 {
                     string sql = @"UPDATE Reserva 
                                    SET InmuebleId = @inmuebleId, InquilinoId = @inquilinoId, 
-                                       FechaInicio = @fechaInicio, FechaFin = @fechaFin, Monto = @monto 
+                                       FechaInicio = @fechaInicio, FechaFin = @fechaFin, MontoPorDia = @montoPorDia 
                                    WHERE Id = @id";
                     using (var command = new MySqlCommand(sql, connection))
                     {
@@ -183,7 +185,7 @@ namespace InmobiliariaGrupoNN.Repositories
                         command.Parameters.AddWithValue("@inquilinoId", reserva.InquilinoId);
                         command.Parameters.AddWithValue("@fechaInicio", reserva.FechaInicio);
                         command.Parameters.AddWithValue("@fechaFin", reserva.FechaFin);
-                        command.Parameters.AddWithValue("@monto", reserva.Monto);
+                        command.Parameters.AddWithValue("@montoPorDia", reserva.MontoPorDia);
                         command.Parameters.AddWithValue("@id", reserva.Id);
                         
                         connection.Open();
@@ -230,11 +232,48 @@ namespace InmobiliariaGrupoNN.Repositories
             if (reserva == null) throw new ArgumentException("La reserva no puede ser nula.");
             if (reserva.InmuebleId <= 0) throw new ArgumentException("Debe seleccionar un Inmueble valido.");
             if (reserva.InquilinoId <= 0) throw new ArgumentException("Debe seleccionar un Inquilino valido.");
-            if (reserva.Monto <= 0) throw new ArgumentException("El monto de la reserva debe ser mayor a cero.");
+            if (reserva.MontoPorDia <= 0) throw new ArgumentException("El monto de la reserva debe ser mayor a cero.");
+            
             if (reserva.FechaFin <= reserva.FechaInicio) 
             {
-                throw new ArgumentException("La fecha de finalizacion debe ser posterior a la fecha de inicio.");
+                throw new ArgumentException("La fecha de finalización debe ser posterior a la fecha de inicio.");
+            }
+            if (reserva.Id == 0 && reserva.FechaInicio.Date < DateTime.Today)
+            {
+                throw new ArgumentException("No se pueden crear reservas con fechas de inicio en el pasado.");
             }
         }
+
+        private void ValidarDisponibilidad(Reserva reserva)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                // Buscamos si hay alguna reserva para este inmueble que se superponga con nuestras fechas.
+                // El "Id != @id" es un truco vital para cuando hacemos Modificación (para que no choque consigo misma).
+                string sql = @"SELECT COUNT(*) FROM Reserva 
+                               WHERE InmuebleId = @inmuebleId 
+                               AND FechaInicio < @fechaFin 
+                               AND FechaFin > @fechaInicio
+                               AND Id != @id";
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@inmuebleId", reserva.InmuebleId);
+                    command.Parameters.AddWithValue("@fechaInicio", reserva.FechaInicio);
+                    command.Parameters.AddWithValue("@fechaFin", reserva.FechaFin);
+                    command.Parameters.AddWithValue("@id", reserva.Id); // En un Alta, reserva.Id será 0, así que no afecta.
+
+                    connection.Open();
+                    int reservasSuperpuestas = Convert.ToInt32(command.ExecuteScalar());
+
+                    if (reservasSuperpuestas > 0)
+                    {
+                        // Usamos InvalidOperationException para diferenciarlo de los errores de formato
+                        throw new InvalidOperationException("El inmueble ya se encuentra reservado en el rango de fechas seleccionado.");
+                    }
+                }
+            }
+        }
+
     }
 }

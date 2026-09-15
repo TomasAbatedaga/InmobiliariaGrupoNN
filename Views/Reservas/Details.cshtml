@@ -21,8 +21,11 @@
             <dt class="col-sm-3 text-muted">Período</dt>
             <dd class="col-sm-9">Desde <strong>@Model.FechaInicio.ToString("dd/MM/yyyy")</strong> hasta <strong>@Model.FechaFin.ToString("dd/MM/yyyy")</strong></dd>
 
-            <dt class="col-sm-3 text-muted">Monto Total</dt>
-            <dd class="col-sm-9 text-success fw-bold">$ @Model.Monto.ToString("N2")</dd>
+            <dt class="col-sm-3 text-muted">Monto por dia</dt>
+            <dd class="col-sm-9 text-success fw-bold">$ @Model.MontoPorDia.ToString("N2")</dd>
+
+            <dt class="col-sm-3 text-muted">Costo Total Estimado</dt>
+            <dd class="col-sm-9 text-success fw-bold">$ @Model.MontoTotal.ToString("N2")</dd>
         </dl>
     </div>
 </div>

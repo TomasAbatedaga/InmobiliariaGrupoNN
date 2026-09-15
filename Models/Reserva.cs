@@ -9,7 +9,8 @@ namespace InmobiliariaGrupoNN.Models
         public int InquilinoId { get; set; }
         public DateTime FechaInicio { get; set; }
         public DateTime FechaFin { get; set; }
-        public decimal Monto { get; set; }
+        public decimal MontoPorDia { get; set; }
+        public decimal MontoTotal => (FechaFin - FechaInicio).Days * MontoPorDia;
         public Inmueble? Inmueble { get; set; }
         public Inquilino? Inquilino { get; set; }
     }
