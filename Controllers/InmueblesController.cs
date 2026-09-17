@@ -3,9 +3,11 @@ using InmobiliariaGrupoNN.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InmobiliariaGrupoNN.Controllers
 {
+    [Authorize]
     public class InmueblesController : Controller
     {
         private readonly IRepositorioInmueble _repositorioInmueble;

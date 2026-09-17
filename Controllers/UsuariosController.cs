@@ -5,9 +5,14 @@ using InmobiliariaGrupoNN.Models;
 using InmobiliariaGrupoNN.Repositories;
 using System;
 using System.IO;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InmobiliariaGrupoNN.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     public class UsuariosController : Controller
     {
         private readonly IRepositorioUsuario _repo;
@@ -172,6 +177,61 @@ namespace InmobiliariaGrupoNN.Controllers
                 var usuario = _repo.ObtenerPorId(id);
                 return View("Delete", usuario);
             }
+        }
+
+        // GET: Usuarios/Login
+        [AllowAnonymous]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: Usuarios/Login
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel modelo)
+        {
+            if (!ModelState.IsValid) return View(modelo);
+
+            var usuario = _repo.ObtenerPorEmail(modelo.Email);
+
+            if (usuario == null || usuario.Clave != modelo.Clave)
+            {
+                ViewBag.Error = "Email o contraseña incorrectos.";
+                return View(modelo);
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new Claim(ClaimTypes.Name, usuario.NombreCompleto),
+                new Claim(ClaimTypes.Email, usuario.Email),
+                new Claim(ClaimTypes.Role, usuario.Rol.ToString()),
+                new Claim("Avatar", usuario.Avatar ?? "") 
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme, 
+                new ClaimsPrincipal(claimsIdentity));
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        // GET: Usuarios/Logout
+        [AllowAnonymous]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login", "Usuarios");
+        }
+
+        [AllowAnonymous]
+        public IActionResult AccesoDenegado()
+        {
+            return View();
         }
     }
 }

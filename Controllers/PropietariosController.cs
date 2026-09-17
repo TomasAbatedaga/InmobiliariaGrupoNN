@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using InmobiliariaGrupoNN.Models;
 using InmobiliariaGrupoNN.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InmobiliariaGrupoNN.Controllers
 {
+    [Authorize]
     public class PropietariosController : Controller
     {
         private readonly IRepositorioPropietario _repositorio;

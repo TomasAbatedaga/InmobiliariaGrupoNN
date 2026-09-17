@@ -2,9 +2,11 @@ using InmobiliariaGrupoNN.Models;
 using InmobiliariaGrupoNN.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InmobiliariaGrupoNN.Controllers
 {
+    [Authorize]
     public class PagosController : Controller
     {
         private readonly IRepositorioPago _repoPago;

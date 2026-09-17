@@ -1,9 +1,11 @@
 using InmobiliariaGrupoNN.Models;
 using InmobiliariaGrupoNN.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InmobiliariaGrupoNN.Controllers
 {
+    [Authorize]
     public class ImagenesController : Controller
     {
         private readonly IRepositorioImagen _repositorioImagen;

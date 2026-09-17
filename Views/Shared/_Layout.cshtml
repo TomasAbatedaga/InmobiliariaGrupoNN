@@ -91,6 +91,27 @@
                     </li>
 
                 </ul>
+                <ul class="navbar-nav ms-auto">
+                    @if (User.Identity!.IsAuthenticated)
+                    {
+                        var avatarUrl = User.FindFirst("Avatar")?.Value;
+                        
+                        <li class="nav-item d-flex align-items-center me-3">
+                            @if (!string.IsNullOrEmpty(avatarUrl))
+                            {
+                                <img src="@avatarUrl" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" alt="Avatar" />
+                            }
+                            <span class="text-dark fw-bold">
+                                Hola, @User.Identity.Name
+                            </span>
+                        </li>
+                        <li class="nav-item d-flex align-items-center">
+                            <a class="btn btn-outline-danger btn-sm" asp-controller="Usuarios" asp-action="Logout">
+                                Cerrar Sesion
+                            </a>
+                        </li>
+                    }
+                </ul>
 
             </div>
         </div>
