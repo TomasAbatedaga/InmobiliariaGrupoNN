@@ -31,6 +31,7 @@
 </div>
 
 <div class="mt-4">
+    <a asp-controller="Pagos" asp-action="Index" asp-route-reservaId="@Model.Id" class="btn btn-primary me-2">Ver Pagos</a>
     <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
     <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
 </div>

@@ -1,0 +1,34 @@
+@model InmobiliariaGrupoNN.Models.Pago
+@{ ViewData["Title"] = "Nuevo Pago"; }
+<h1>Nuevo Pago</h1>
+<hr />
+<div class="alert alert-info">
+    <strong>Reserva #@Model.ReservaId</strong> — @Model.Reserva?.Inmueble?.Direccion<br />
+    Inquilino: @Model.Reserva?.Inquilino?.Nombre @Model.Reserva?.Inquilino?.Apellido
+</div>
+<div class="row"><div class="col-md-6">
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+        <input asp-for="ReservaId" type="hidden" />
+        <div class="mb-3">
+            <label asp-for="Concepto" class="form-label"></label>
+            <input asp-for="Concepto" class="form-control" maxlength="150" required />
+            <span asp-validation-for="Concepto" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="FechaPago" class="form-label">Fecha del pago</label>
+            <input asp-for="FechaPago" type="date" class="form-control" required />
+            <span asp-validation-for="FechaPago" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Importe" class="form-label"></label>
+            <input asp-for="Importe" type="number" step="0.01" min="0.01" max="99999999.99" class="form-control" required />
+            <span asp-validation-for="Importe" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a asp-action="Index" asp-route-reservaId="@Model.ReservaId" class="btn btn-secondary">Volver a Pagos</a>
+    </form>
+</div></div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

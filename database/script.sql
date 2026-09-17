@@ -62,9 +62,31 @@ CREATE TABLE IF NOT EXISTS Reserva (
     InquilinoId INT NOT NULL,
     FechaInicio DATE NOT NULL,
     FechaFin DATE NOT NULL,
-    Monto DECIMAL(10,2) NOT NULL,
+    MontoPorDia DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (InmuebleId) REFERENCES Inmueble(Id),
     FOREIGN KEY (InquilinoId) REFERENCES Inquilino(Id)
+);
+
+CREATE TABLE IF NOT EXISTS Usuario (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(50) NOT NULL,
+    Apellido VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    Clave VARCHAR(255) NOT NULL,
+    Avatar VARCHAR(255) NULL,
+    Rol INT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Pago (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    ReservaId INT NOT NULL,
+    Concepto VARCHAR(150) NOT NULL,
+    FechaPago DATE NOT NULL,
+    Importe DECIMAL(10,2) NOT NULL,
+    EstadoActivo BOOLEAN NOT NULL DEFAULT TRUE,
+    FechaAnulacion DATETIME NULL,
+    INDEX IX_Pago_ReservaId_Id (ReservaId, Id),
+    FOREIGN KEY (ReservaId) REFERENCES Reserva(Id)
 );
 
 INSERT INTO Propietario (Dni, Nombre, Apellido, Telefono, Email)
@@ -101,3 +123,4 @@ INSERT INTO Inmueble (
 VALUES
 ('Av. Illia 123', 3, 5, 45000.00, -33.3017000, -66.3378000, 30.00, TRUE, 1, 2),
 ('Los Lapachos 450', 4, 6, 60000.00, -33.2905000, -66.3201000, 25.00, TRUE, 2, 1);
+

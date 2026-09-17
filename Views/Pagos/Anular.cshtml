@@ -1,0 +1,16 @@
+﻿@model InmobiliariaGrupoNN.Models.Pago
+@{ ViewData["Title"] = "Anular Pago"; }
+<h2 class="text-danger mb-4">Anular Pago #@Model.Id</h2>
+<h3>¿Está seguro de que desea anular este pago?</h3>
+<div class="alert alert-warning">El registro no será eliminado y seguirá figurando como anulado. No podrá editarse ni reactivarse.</div>
+<dl class="row">
+    <dt class="col-sm-3">Reserva</dt><dd class="col-sm-9">#@Model.ReservaId — @Model.Reserva?.Inmueble?.Direccion</dd>
+    <dt class="col-sm-3">Concepto</dt><dd class="col-sm-9">@Model.Concepto</dd>
+    <dt class="col-sm-3">Fecha del pago</dt><dd class="col-sm-9">@Model.FechaPago.ToString("dd/MM/yyyy")</dd>
+    <dt class="col-sm-3">Importe</dt><dd class="col-sm-9">$ @Model.Importe.ToString("N2")</dd>
+</dl>
+<form asp-action="Anular" asp-route-id="@Model.Id" method="post">
+    <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+    <button type="submit" class="btn btn-danger">Confirmar anulación</button>
+    <a asp-action="Index" asp-route-reservaId="@Model.ReservaId" class="btn btn-secondary">Cancelar</a>
+</form>

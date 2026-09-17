@@ -1,0 +1,26 @@
+@model InmobiliariaGrupoNN.Models.Pago
+@{ ViewData["Title"] = "Editar concepto"; }
+<h1>Editar Pago #@Model.Id</h1>
+<hr />
+<div class="card mb-3"><div class="card-body">
+    <dl class="row mb-0">
+        <dt class="col-sm-3">Reserva</dt><dd class="col-sm-9">#@Model.ReservaId — @Model.Reserva?.Inmueble?.Direccion</dd>
+        <dt class="col-sm-3">Fecha del pago</dt><dd class="col-sm-9">@Model.FechaPago.ToString("dd/MM/yyyy")</dd>
+        <dt class="col-sm-3">Importe</dt><dd class="col-sm-9">$ @Model.Importe.ToString("N2")</dd>
+    </dl>
+</div></div>
+<div class="row"><div class="col-md-6">
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+        <div class="mb-3">
+            <label asp-for="Concepto" class="form-label"></label>
+            <input asp-for="Concepto" class="form-control" maxlength="150" required />
+            <span asp-validation-for="Concepto" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+        <a asp-action="Index" asp-route-reservaId="@Model.ReservaId" class="btn btn-secondary">Volver a Pagos</a>
+    </form>
+</div></div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
