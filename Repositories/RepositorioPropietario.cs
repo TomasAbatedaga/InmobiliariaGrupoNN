@@ -150,7 +150,9 @@ namespace InmobiliariaGrupoNN.Repositories
             int filasAfectadas = 0;
             using (var connection = new MySqlConnection(_connectionString))
             {
-                string sql = "UPDATE Propietario SET EstadoActivo = 0, FechaBaja = CURRENT_TIMESTAMP WHERE Id = @id";
+                string sql = @"UPDATE Propietario 
+                               SET EstadoActivo = 0, FechaBaja = NOW() 
+                               WHERE Id = @Id;";
                 
                 using (var command = new MySqlCommand(sql, connection))
                 {

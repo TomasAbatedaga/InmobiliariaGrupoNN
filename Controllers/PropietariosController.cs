@@ -73,10 +73,21 @@ namespace InmobiliariaGrupoNN.Controllers
 
         // POST: Propietarios/Delete/id
         [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            _repositorio.Baja(id); // baja logica
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                _repositorio.Baja(id);
+                TempData["Mensaje"] = "El propietario fue dado de baja exitosamente.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Ocurrió un error al intentar dar de baja: " + ex.Message;
+                var propietario = _repositorio.ObtenerPorId(id);
+                return View("Delete", propietario);
+            }
         }
     }
 }
