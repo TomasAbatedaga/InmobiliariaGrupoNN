@@ -98,19 +98,28 @@ namespace InmobiliariaGrupoNN.Controllers
             reserva.FechaInicio = reserva.FechaInicio.Date;
             reserva.FechaFin = reserva.FechaFin.Date;
             ValidarFechas(reserva.FechaInicio, reserva.FechaFin);
+
             if (reserva.FechaInicio < DateTime.Today)
                 ModelState.AddModelError(nameof(reserva.FechaInicio), "No se pueden crear reservas con inicio en el pasado.");
+
             var inmueble = reserva.InmuebleId > 0 ? _repoInmueble.ObtenerPorId(reserva.InmuebleId) : null;
+            
             if (inmueble == null)
                 ModelState.AddModelError(nameof(reserva.InmuebleId), "El inmueble seleccionado no existe.");
             else if (!inmueble.EstadoActivo || !inmueble.Disponible)
                 ModelState.AddModelError(nameof(reserva.InmuebleId), "El inmueble ya no está habilitado para nuevas reservas.");
+                
             reserva.Inmueble = inmueble;
+
             try
             {
                 if (ModelState.IsValid)
                 {
-                    // Alta vuelve a validar estados y solapamiento antes del INSERT.
+                    var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    if (int.TryParse(claimId, out int usuarioId))
+                    {
+                        reserva.CreadoPorId = usuarioId;
+                    }
                     _repoReserva.Alta(reserva);
                     return RedirectToAction(nameof(Index));
                 }
@@ -119,7 +128,9 @@ namespace InmobiliariaGrupoNN.Controllers
             {
                 ModelState.AddModelError("", ex.Message);
             }
+            
             ViewBag.Inquilinos = _repoInquilino.ObtenerTodos();
+            ViewBag.Inmuebles = _repoInmueble.ObtenerTodos();
             return View(reserva);
         }
 
@@ -200,7 +211,15 @@ namespace InmobiliariaGrupoNN.Controllers
         {
             try
             {
-                _repoReserva.Baja(id);
+                int? anuladoPorId = null;
+                var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                
+                if (int.TryParse(claimId, out int usuarioId))
+                {
+                    anuladoPorId = usuarioId;
+                }
+                _repoReserva.Baja(id, anuladoPorId);
+                
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

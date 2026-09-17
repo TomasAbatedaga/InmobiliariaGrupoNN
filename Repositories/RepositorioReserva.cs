@@ -151,9 +151,10 @@ namespace InmobiliariaGrupoNN.Repositories
             {
                 using (var connection = new MySqlConnection(_connectionString))
                 {
-                    string sql = @"INSERT INTO Reserva (InmuebleId, InquilinoId, FechaInicio, FechaFin, MontoPorDia) 
-                                   VALUES (@inmuebleId, @inquilinoId, @fechaInicio, @fechaFin, @montoPorDia); 
-                                   SELECT LAST_INSERT_ID();";
+                    string sql = @"INSERT INTO Reserva 
+                                    (InmuebleId, InquilinoId, FechaInicio, FechaFin, MontoPorDia, CreadoPorId) 
+                                    VALUES (@InmuebleId, @InquilinoId, @FechaInicio, @FechaFin, @MontoPorDia, @CreadoPorId);
+                                    SELECT LAST_INSERT_ID();";
                     using (var command = new MySqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@inmuebleId", reserva.InmuebleId);
@@ -161,6 +162,7 @@ namespace InmobiliariaGrupoNN.Repositories
                         command.Parameters.AddWithValue("@fechaInicio", reserva.FechaInicio);
                         command.Parameters.AddWithValue("@fechaFin", reserva.FechaFin);
                         command.Parameters.AddWithValue("@montoPorDia", reserva.MontoPorDia);
+                        command.Parameters.AddWithValue("@CreadoPorId", reserva.CreadoPorId.HasValue ? reserva.CreadoPorId.Value : DBNull.Value);
                         
                         connection.Open();
                         res = Convert.ToInt32(command.ExecuteScalar());
@@ -211,17 +213,22 @@ namespace InmobiliariaGrupoNN.Repositories
             return res;
         }
 
-        public int Baja(int id)
+        public int Baja(int id, int? anuladoPorId)
         {
-            if (id <= 0) throw new ArgumentException("El ID proporcionado no es válido.");
+            if (id <= 0) throw new ArgumentException("El ID proporcionado no es valido.");
 
             int res = -1;
             using (var connection = new MySqlConnection(_connectionString))
             {
-                string sql = "DELETE FROM Reserva WHERE Id = @id";
+                string sql = @"UPDATE Reserva 
+                                SET EstadoActivo = 0, AnuladoPorId = @AnuladoPorId 
+                                WHERE Id = @Id;";
                 using (var command = new MySqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("@Id", id);
+                    
+                    command.Parameters.AddWithValue("@AnuladoPorId", anuladoPorId.HasValue ? anuladoPorId.Value : DBNull.Value);
+                    
                     connection.Open();
                     
                     try
@@ -275,8 +282,6 @@ namespace InmobiliariaGrupoNN.Repositories
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
-                // Buscamos si hay alguna reserva para este inmueble que se superponga con nuestras fechas.
-                // El "Id != @id" es un truco vital para cuando hacemos Modificación (para que no choque consigo misma).
                 string sql = @"SELECT COUNT(*) FROM Reserva 
                                WHERE InmuebleId = @inmuebleId 
                                AND FechaInicio < @fechaFin 
@@ -288,14 +293,13 @@ namespace InmobiliariaGrupoNN.Repositories
                     command.Parameters.AddWithValue("@inmuebleId", reserva.InmuebleId);
                     command.Parameters.AddWithValue("@fechaInicio", reserva.FechaInicio);
                     command.Parameters.AddWithValue("@fechaFin", reserva.FechaFin);
-                    command.Parameters.AddWithValue("@id", reserva.Id); // En un Alta, reserva.Id será 0, así que no afecta.
+                    command.Parameters.AddWithValue("@id", reserva.Id);
 
                     connection.Open();
                     int reservasSuperpuestas = Convert.ToInt32(command.ExecuteScalar());
 
                     if (reservasSuperpuestas > 0)
                     {
-                        // Usamos InvalidOperationException para diferenciarlo de los errores de formato
                         throw new InvalidOperationException("El inmueble ya se encuentra reservado en el rango de fechas seleccionado.");
                     }
                 }

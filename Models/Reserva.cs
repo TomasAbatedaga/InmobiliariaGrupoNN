@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InmobiliariaGrupoNN.Models
 {
@@ -13,5 +14,12 @@ namespace InmobiliariaGrupoNN.Models
         public decimal MontoTotal => (FechaFin - FechaInicio).Days * MontoPorDia;
         public Inmueble? Inmueble { get; set; }
         public Inquilino? Inquilino { get; set; }
+        public int? CreadoPorId { get; set; }
+        [ForeignKey("CreadoPorId")]
+        public Usuario? CreadoPor { get; set; }
+        public int? AnuladoPorId { get; set; }
+        
+        [ForeignKey("AnuladoPorId")]
+        public Usuario? AnuladoPor { get; set; }
     }
 }
