@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace InmobiliariaGrupoNN.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    [Authorize]
     public class UsuariosController : Controller
     {
         private readonly IRepositorioUsuario _repo;
@@ -25,6 +25,7 @@ namespace InmobiliariaGrupoNN.Controllers
         }
 
         // GET: Usuarios
+        [Authorize(Roles = "Administrador")]
         public IActionResult Index(int pagina = 1, int tamanio = 10)
         {
             ViewBag.PaginaActual = pagina;
@@ -34,6 +35,7 @@ namespace InmobiliariaGrupoNN.Controllers
         }
 
         // GET: Usuarios/Create
+        [Authorize(Roles = "Administrador")]
         public IActionResult Create()
         {
             return View();
@@ -42,6 +44,7 @@ namespace InmobiliariaGrupoNN.Controllers
         // POST: Usuarios/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult Create(Usuario usuario, IFormFile? avatarFile)
         {
             try
@@ -84,6 +87,7 @@ namespace InmobiliariaGrupoNN.Controllers
         }
         
         // GET: Usuarios/Edit/5
+        [Authorize(Roles = "Administrador")]
         public IActionResult Edit(int id)
         {
             var usuario = _repo.ObtenerPorId(id);
@@ -95,6 +99,7 @@ namespace InmobiliariaGrupoNN.Controllers
         // POST: Usuarios/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult Edit(Usuario usuario, IFormFile? avatarFile)
         {
             try
@@ -143,6 +148,7 @@ namespace InmobiliariaGrupoNN.Controllers
         }
 
         // GET: Usuarios/Delete/5
+        [Authorize(Roles = "Administrador")]
         public IActionResult Delete(int id)
         {
             var usuario = _repo.ObtenerPorId(id);
@@ -154,6 +160,7 @@ namespace InmobiliariaGrupoNN.Controllers
         // POST: Usuarios/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult DeleteConfirmed(int id)
         {
             try
@@ -198,7 +205,7 @@ namespace InmobiliariaGrupoNN.Controllers
 
             if (usuario == null || usuario.Clave != modelo.Clave)
             {
-                ViewBag.Error = "Email o contraseña incorrectos.";
+                ViewBag.Error = "Email o contrasenia incorrectos.";
                 return View(modelo);
             }
 
@@ -233,5 +240,72 @@ namespace InmobiliariaGrupoNN.Controllers
         {
             return View();
         }
+
+        // GET: Usuarios/Perfil
+        public IActionResult Perfil()
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idClaim, out int idUsuario)) return RedirectToAction("Login");
+
+            var usuario = _repo.ObtenerPorId(idUsuario);
+            if (usuario == null) return NotFound();
+
+            return View(usuario);
+        }
+
+        // POST: Usuarios/Perfil
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Perfil(Usuario usuario, IFormFile? avatarFile)
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (usuario.Id.ToString() != idClaim) 
+            {
+                return RedirectToAction("AccesoDenegado");
+            }
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var usuarioOriginal = _repo.ObtenerPorId(usuario.Id);
+                    usuario.Rol = usuarioOriginal!.Rol; 
+
+                    if (avatarFile != null && avatarFile.Length > 0)
+                    {
+                        string wwwRootPath = _environment.WebRootPath;
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(avatarFile.FileName);
+                        string path = Path.Combine(wwwRootPath, "uploads", "avatars");
+                        
+                        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+                        string fullPath = Path.Combine(path, fileName);
+                        using (var fileStream = new FileStream(fullPath, FileMode.Create))
+                        {
+                            avatarFile.CopyTo(fileStream);
+                        }
+
+                        if (!string.IsNullOrEmpty(usuario.Avatar))
+                        {
+                            string oldImagePath = Path.Combine(wwwRootPath, usuario.Avatar.TrimStart('/'));
+                            if (System.IO.File.Exists(oldImagePath)) System.IO.File.Delete(oldImagePath);
+                        }
+
+                        usuario.Avatar = "/uploads/avatars/" + fileName;
+                    }
+
+                    _repo.Modificacion(usuario);
+                    ViewBag.Mensaje = "Perfil actualizado correctamente. (Si cambiaste tu foto, inicia sesion nuevamente para verla en la barra superior).";
+                    return View(usuario);
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+            }
+            
+            return View(usuario);
+        }
+        
     }
 }
