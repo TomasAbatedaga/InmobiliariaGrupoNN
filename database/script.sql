@@ -89,6 +89,8 @@ CREATE TABLE IF NOT EXISTS Pago (
     FOREIGN KEY (ReservaId) REFERENCES Reserva(Id)
 );
 
+-- DATOS DE PRUEBA
+
 INSERT INTO Propietario (Dni, Nombre, Apellido, Telefono, Email)
 VALUES
 ('11111', 'Carlos', 'Gomez', '2664111111', 'carlos.gomez@gmail.com'),
@@ -124,3 +126,18 @@ VALUES
 ('Av. Illia 123', 3, 5, 45000.00, -33.3017000, -66.3378000, 30.00, TRUE, 1, 2),
 ('Los Lapachos 450', 4, 6, 60000.00, -33.2905000, -66.3201000, 25.00, TRUE, 2, 1);
 
+INSERT INTO Reserva (InmuebleId, InquilinoId, FechaInicio, FechaFin, MontoPorDia)
+VALUES
+(1, 1, '2026-10-01', '2026-10-10', 45000.00),
+(2, 2, '2026-11-15', '2026-11-20', 60000.00);
+
+INSERT INTO Pago (ReservaId, Concepto, FechaPago, Importe)
+VALUES
+(1, 'Seña de reserva', '2026-09-15', 135000.00),
+(2, 'Pago total anticipado', '2026-09-17', 300000.00);
+
+
+INSERT INTO Usuario (Nombre, Apellido, Email, Clave, Rol)
+VALUES
+('Admin', 'Administrador', 'admin@inmobiliaria.com', '123456', 1),
+('Empleado', 'Empleado', 'empleado@inmobiliaria.com', '123456', 2);
