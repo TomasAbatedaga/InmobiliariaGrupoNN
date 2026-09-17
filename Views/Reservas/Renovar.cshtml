@@ -1,0 +1,54 @@
+@model InmobiliariaGrupoNN.Models.Reserva
+
+@{
+    ViewData["Title"] = "Renovar Contrato";
+    var original = ViewBag.ReservaOriginal as InmobiliariaGrupoNN.Models.Reserva;
+}
+
+<h2 class="mb-4 text-success">Renovar Contrato de Alquiler</h2>
+<hr />
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+<div class="alert alert-info">
+    Estas generando un <strong>nuevo contrato</strong>. El contrato original (Finalizacion: @original?.FechaFin.ToShortDateString()) quedara intacto en el historial.
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Renovar">
+            
+            <input type="hidden" asp-for="InmuebleId" />
+            <input type="hidden" asp-for="InquilinoId" />
+
+            <div class="row mb-3">
+                <div class="col">
+                    <label asp-for="FechaInicio" class="control-label fw-bold">Nueva Fecha de Inicio</label>
+                    <input asp-for="FechaInicio" type="date" class="form-control" required />
+                    <span asp-validation-for="FechaInicio" class="text-danger"></span>
+                </div>
+                <div class="col">
+                    <label asp-for="FechaFin" class="control-label fw-bold">Nueva Fecha de Fin</label>
+                    <input asp-for="FechaFin" type="date" class="form-control" required />
+                    <span asp-validation-for="FechaFin" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="MontoPorDia" class="control-label fw-bold">Nuevo Monto por Día ($)</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <!-- type="number" con step="0.01" para permitir decimales en la base de datos -->
+                    <input asp-for="MontoPorDia" type="number" step="0.01" class="form-control" required />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Confirmar Renovación" class="btn btn-success" />
+                <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

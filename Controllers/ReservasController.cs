@@ -210,5 +210,52 @@ namespace InmobiliariaGrupoNN.Controllers
                 return View("Delete", reserva);
             }
         }
+
+        // GET: Reservas/Renovar/5
+        public IActionResult Renovar(int id)
+        {
+            var reservaOriginal = _repoReserva.ObtenerPorId(id);
+            if (reservaOriginal == null) return NotFound();
+
+            var nuevaReserva = new Reserva
+            {
+                InmuebleId = reservaOriginal.InmuebleId,
+                InquilinoId = reservaOriginal.InquilinoId,
+                FechaInicio = reservaOriginal.FechaFin, 
+                FechaFin = reservaOriginal.FechaFin.AddMonths(1),
+                MontoPorDia = reservaOriginal.MontoPorDia
+            };
+
+            ViewBag.ReservaOriginal = reservaOriginal;
+
+            return View(nuevaReserva);
+        }
+
+        // POST: Reservas/Renovar
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Renovar(Reserva nuevaReserva)
+        {
+            try
+            {
+                if (nuevaReserva.FechaFin <= nuevaReserva.FechaInicio)
+                {
+                    ModelState.AddModelError("", "La fecha de finalizacion debe ser posterior a la fecha de inicio.");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    _repoReserva.Alta(nuevaReserva);
+                    TempData["Mensaje"] = "El contrato ha sido renovado exitosamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+            }
+
+            return View(nuevaReserva);
+        }
     }
 }

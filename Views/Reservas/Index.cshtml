@@ -34,28 +34,58 @@
             <th>Inquilino</th>
             <th>Inicio</th>
             <th>Fin</th>
+            <th class="text-center">Estado</th>
             <th class="text-center">Acciones</th>
         </tr>
     </thead>
     <tbody>
         @if (!Model.Any())
         {
-            <tr><td colspan="5" class="text-center text-muted">No hay reservas registradas.</td></tr>
+            <tr><td colspan="6" class="text-center text-muted">No hay reservas registradas.</td></tr>
         }
         @foreach (var item in Model) {
-        <tr>
-            <td class="align-middle">@item.Inmueble?.Direccion</td>
-            <td class="align-middle">@item.Inquilino?.Nombre @item.Inquilino?.Apellido</td>
-            <td class="align-middle">@item.FechaInicio.ToString("dd/MM/yyyy")</td>
-            <td class="align-middle">@item.FechaFin.ToString("dd/MM/yyyy")</td>
-            <td>
-                <div class="d-flex justify-content-center gap-2">
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm px-2 text-white">Detalles</a> 
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm px-2">Editar</a> 
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm px-2">Eliminar</a>
-                </div>
-            </td>
-        </tr>
+            
+            var hoy = DateTime.Today;
+            string claseBadge = "";
+            string textoEstado = "";
+
+            if (item.FechaFin < hoy)
+            {
+                claseBadge = "bg-secondary";
+                textoEstado = "Finalizada";
+            }
+            else if (item.FechaInicio <= hoy && item.FechaFin >= hoy)
+            {
+                claseBadge = "bg-success";
+                textoEstado = "En Curso";
+            }
+            else
+            {
+                claseBadge = "bg-primary";
+                textoEstado = "Futura";
+            }
+
+            <tr>
+                <td class="align-middle">@item.Inmueble?.Direccion</td>
+                <td class="align-middle">@item.Inquilino?.Nombre @item.Inquilino?.Apellido</td>
+                <td class="align-middle">@item.FechaInicio.ToString("dd/MM/yyyy")</td>
+                <td class="align-middle">@item.FechaFin.ToString("dd/MM/yyyy")</td>
+                
+                <td class="align-middle text-center">
+                    <span class="badge @claseBadge">@textoEstado</span>
+                </td>
+
+                <td class="align-middle">
+                    <div class="d-flex justify-content-center gap-2">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm px-2 text-white">Detalles</a> 
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm px-2">Editar</a> 
+                        <a asp-action="Renovar" asp-route-id="@item.Id" class="btn btn-success btn-sm px-2" title="Renovar Contrato">
+                            <i class="bi bi-arrow-repeat"></i> Renovar
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm px-2">Eliminar</a>
+                    </div>
+                </td>
+            </tr>
         }
     </tbody>
 </table>
