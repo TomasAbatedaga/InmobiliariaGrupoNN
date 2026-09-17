@@ -73,6 +73,68 @@ namespace InmobiliariaGrupoNN.Repositories
             return inmuebles;
         }
 
+        // La búsqueda y el conteo comparten exactamente los mismos filtros.
+        private const string FiltroDisponibles = @"
+            FROM Inmueble i
+            INNER JOIN Propietario p ON p.Id = i.PropietarioId
+            INNER JOIN TipoInmueble t ON t.Id = i.TipoInmuebleId
+            WHERE i.EstadoActivo = TRUE AND i.Disponible = TRUE
+              AND (@CupoMinimo IS NULL OR i.Cupo >= @CupoMinimo)
+              AND (@Tipo IS NULL OR t.Nombre LIKE @Tipo)
+              AND NOT EXISTS (
+                  SELECT 1 FROM Reserva r
+                  WHERE r.InmuebleId = i.Id
+                    AND r.FechaInicio < @FechaFin
+                    AND r.FechaFin > @FechaInicio
+              )";
+
+        public IList<Inmueble> BuscarDisponibles(DateTime fechaInicio, DateTime fechaFin,
+            int? cupoMinimo, string? tipo, int numeroPagina = 1, int tamanio = 10)
+        {
+            numeroPagina = Math.Max(1, numeroPagina);
+            if (tamanio != 5 && tamanio != 10 && tamanio != 20) tamanio = 10;
+            using var connection = new MySqlConnection(_connectionString);
+            using var command = new MySqlCommand(@"SELECT
+                i.Id, i.Direccion, i.Ambientes, i.Cupo, i.PrecioPorDia,
+                i.Latitud, i.Longitud, i.PorcentajeReserva, i.Disponible,
+                i.EstadoActivo, i.FechaBaja, i.Portada, i.PropietarioId,
+                i.TipoInmuebleId, p.Nombre, p.Apellido, t.Nombre"
+                + FiltroDisponibles + " ORDER BY i.Id LIMIT @Tamanio OFFSET @Offset", connection);
+            AgregarParametrosDisponibilidad(command, fechaInicio, fechaFin, cupoMinimo, tipo);
+            command.Parameters.AddWithValue("@Tamanio", tamanio);
+            command.Parameters.AddWithValue("@Offset", ((long)numeroPagina - 1) * tamanio);
+            connection.Open();
+            using var reader = command.ExecuteReader();
+            var inmuebles = new List<Inmueble>();
+            while (reader.Read()) inmuebles.Add(MapearInmueble(reader));
+            return inmuebles;
+        }
+
+        public int ObtenerCantidadDisponibles(DateTime fechaInicio, DateTime fechaFin,
+            int? cupoMinimo, string? tipo)
+        {
+            using var connection = new MySqlConnection(_connectionString);
+            using var command = new MySqlCommand("SELECT COUNT(*) " + FiltroDisponibles, connection);
+            AgregarParametrosDisponibilidad(command, fechaInicio, fechaFin, cupoMinimo, tipo);
+            connection.Open();
+            return Convert.ToInt32(command.ExecuteScalar());
+        }
+
+        private static void AgregarParametrosDisponibilidad(MySqlCommand command,
+            DateTime fechaInicio, DateTime fechaFin, int? cupoMinimo, string? tipo)
+        {
+            fechaInicio = fechaInicio.Date;
+            fechaFin = fechaFin.Date;
+            if (fechaInicio < new DateTime(1000, 1, 1) || fechaFin <= fechaInicio)
+                throw new ArgumentException("Debe indicar un período de fechas válido.");
+            if (cupoMinimo.HasValue && cupoMinimo.Value < 1)
+                throw new ArgumentException("El cupo mínimo debe ser mayor a cero.");
+            command.Parameters.AddWithValue("@FechaInicio", fechaInicio);
+            command.Parameters.AddWithValue("@FechaFin", fechaFin);
+            command.Parameters.AddWithValue("@CupoMinimo", (object?)cupoMinimo ?? DBNull.Value);
+            command.Parameters.AddWithValue("@Tipo", string.IsNullOrWhiteSpace(tipo)
+                ? DBNull.Value : (object)("%" + tipo.Trim() + "%"));
+        }
         public Inmueble? ObtenerPorId(int id)
         {
             Inmueble? inmueble = null;

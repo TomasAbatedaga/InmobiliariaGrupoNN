@@ -6,6 +6,11 @@ namespace InmobiliariaGrupoNN.Repositories
     {
         IList<Inmueble> ObtenerTodos(int numeroPagina = 1, int tamanio = 10);
 
+        IList<Inmueble> BuscarDisponibles(DateTime fechaInicio, DateTime fechaFin,
+            int? cupoMinimo, string? tipo, int numeroPagina = 1, int tamanio = 10);
+
+        int ObtenerCantidadDisponibles(DateTime fechaInicio, DateTime fechaFin,
+            int? cupoMinimo, string? tipo);
         Inmueble? ObtenerPorId(int id);
 
         int Alta(Inmueble inmueble);

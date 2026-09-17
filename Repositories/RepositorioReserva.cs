@@ -21,7 +21,7 @@ namespace InmobiliariaGrupoNN.Repositories
             if (numeroPagina < 1) numeroPagina = 1;
             if (tamanio < 1) tamanio = 10;
 
-            int offset = (numeroPagina - 1) * tamanio;
+            long offset = ((long)numeroPagina - 1) * tamanio;
             var reservas = new List<Reserva>();
 
             try
@@ -35,6 +35,7 @@ namespace InmobiliariaGrupoNN.Repositories
                         FROM Reserva r
                         INNER JOIN Inmueble i ON r.InmuebleId = i.Id
                         INNER JOIN Inquilino inq ON r.InquilinoId = inq.Id
+                        ORDER BY r.Id DESC
                         LIMIT @tamanio OFFSET @offset";
 
                     using (var command = new MySqlCommand(sql, connection))
@@ -75,6 +76,13 @@ namespace InmobiliariaGrupoNN.Repositories
             return reservas;
         }
 
+        public int ObtenerCantidad()
+        {
+            using var connection = new MySqlConnection(_connectionString);
+            using var command = new MySqlCommand("SELECT COUNT(*) FROM Reserva", connection);
+            connection.Open();
+            return Convert.ToInt32(command.ExecuteScalar());
+        }
         public Reserva? ObtenerPorId(int id)
         {
             if (id <= 0) throw new ArgumentException("El ID debe ser mayor a cero.");
@@ -132,7 +140,10 @@ namespace InmobiliariaGrupoNN.Repositories
 
         public int Alta(Reserva reserva)
         {
+            ArgumentNullException.ThrowIfNull(reserva);
+            reserva.Id = 0;
             ValidarReserva(reserva);
+            ValidarInmuebleParaAlta(reserva.InmuebleId);
             ValidarDisponibilidad(reserva);
 
             int res = -1;
@@ -230,6 +241,10 @@ namespace InmobiliariaGrupoNN.Repositories
         private void ValidarReserva(Reserva reserva)
         {
             if (reserva == null) throw new ArgumentException("La reserva no puede ser nula.");
+            reserva.FechaInicio = reserva.FechaInicio.Date;
+            reserva.FechaFin = reserva.FechaFin.Date;
+            if (reserva.FechaInicio < new DateTime(1000, 1, 1) || reserva.FechaFin < new DateTime(1000, 1, 1))
+                throw new ArgumentException("Las fechas son obligatorias y deben ser válidas para MySQL.");
             if (reserva.InmuebleId <= 0) throw new ArgumentException("Debe seleccionar un Inmueble valido.");
             if (reserva.InquilinoId <= 0) throw new ArgumentException("Debe seleccionar un Inquilino valido.");
             if (reserva.MontoPorDia <= 0) throw new ArgumentException("El monto de la reserva debe ser mayor a cero.");
@@ -244,6 +259,18 @@ namespace InmobiliariaGrupoNN.Repositories
             }
         }
 
+        private void ValidarInmuebleParaAlta(int inmuebleId)
+        {
+            using var connection = new MySqlConnection(_connectionString);
+            using var command = new MySqlCommand(
+                "SELECT EstadoActivo, Disponible FROM Inmueble WHERE Id = @Id", connection);
+            command.Parameters.AddWithValue("@Id", inmuebleId);
+            connection.Open();
+            using var reader = command.ExecuteReader();
+            if (!reader.Read()) throw new ArgumentException("El inmueble seleccionado no existe.");
+            if (!reader.GetBoolean("EstadoActivo") || !reader.GetBoolean("Disponible"))
+                throw new InvalidOperationException("El inmueble ya no está habilitado para nuevas reservas.");
+        }
         private void ValidarDisponibilidad(Reserva reserva)
         {
             using (var connection = new MySqlConnection(_connectionString))

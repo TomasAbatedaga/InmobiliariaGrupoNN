@@ -14,19 +14,18 @@
 
 <div class="row">
     <div class="col-md-5">
-        <form asp-action="Create">
-            <div class="form-group mb-3">
-                <label asp-for="InmuebleId" class="control-label fw-bold">Inmueble</label>
-                <select asp-for="InmuebleId" class="form-select" required>
-                    <option value="">Seleccione un inmueble...</option>
-                    @if(ViewBag.Inmuebles != null) {
-                        foreach (var item in ViewBag.Inmuebles) {
-                            <option value="@item.Id">@item.Direccion</option>
-                        }
-                    }
-                </select>
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+            <input type="hidden" asp-for="InmuebleId" />
+            <div class="alert alert-info">
+                <strong>Inmueble:</strong> @Model.Inmueble?.Direccion<br />
+                <strong>Tipo:</strong> @Model.Inmueble?.TipoInmueble?.Nombre —
+                <strong>Cupo:</strong> @Model.Inmueble?.Cupo
             </div>
-            
+            <a asp-action="BuscarDisponibilidad" asp-route-buscar="true"
+               asp-route-fechaInicio="@Model.FechaInicio.ToString("yyyy-MM-dd")"
+               asp-route-fechaFin="@Model.FechaFin.ToString("yyyy-MM-dd")"
+               class="btn btn-outline-secondary mb-3">Elegir otro inmueble</a>
             <div class="form-group mb-3">
                 <label asp-for="InquilinoId" class="control-label fw-bold">Inquilino</label>
                 <select asp-for="InquilinoId" class="form-select" required>

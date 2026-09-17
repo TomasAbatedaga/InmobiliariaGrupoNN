@@ -7,14 +7,23 @@
 <h2 class="mb-4">Gestión de Reservas</h2>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <a asp-action="Create" class="btn btn-primary">Nueva Reserva</a>
+    <a asp-action="BuscarDisponibilidad" class="btn btn-primary">Buscar disponibilidad / Nueva Reserva</a>
     <form asp-action="Index" method="get" class="d-flex align-items-center">
         <label class="me-2 fw-bold text-muted">Mostrar:</label>
         <select name="tamanio" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-            <option value="5" selected="@(ViewBag.TamanioPagina == 5 ? "selected" : null)">5 filas</option>
-            <option value="10" selected="@(ViewBag.TamanioPagina == 10 ? "selected" : null)">10 filas</option>
+            @foreach (var cantidad in new[] { 5, 10, 20 })
+            {
+                if (ViewBag.TamanioPagina == cantidad)
+                {
+                    <option value="@cantidad" selected="selected">@cantidad filas</option>
+                }
+                else
+                {
+                    <option value="@cantidad">@cantidad filas</option>
+                }
+            }
         </select>
-        <input type="hidden" name="pagina" value="@ViewBag.PaginaActual" />
+        <input type="hidden" name="pagina" value="1" />
     </form>
 </div>
 
@@ -29,6 +38,10 @@
         </tr>
     </thead>
     <tbody>
+        @if (!Model.Any())
+        {
+            <tr><td colspan="5" class="text-center text-muted">No hay reservas registradas.</td></tr>
+        }
         @foreach (var item in Model) {
         <tr>
             <td class="align-middle">@item.Inmueble?.Direccion</td>
@@ -48,9 +61,23 @@
 </table>
 
 <div class="d-flex justify-content-between align-items-center mt-3">
-    <span class="text-muted">Página @ViewBag.PaginaActual</span>
-    <div>
-        <a asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual - 1)" asp-route-tamanio="@ViewBag.TamanioPagina" class="btn btn-outline-secondary btn-sm @(ViewBag.PaginaActual <= 1 ? "disabled" : "")">Anterior</a>
-        <a asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual + 1)" asp-route-tamanio="@ViewBag.TamanioPagina" class="btn btn-outline-secondary btn-sm">Siguiente</a>
-    </div>
+    <span class="text-muted">Página @ViewBag.PaginaActual de @ViewBag.TotalPaginas — @ViewBag.TotalRegistros reservas</span>
+    <nav aria-label="Páginas de reservas">
+        @if (ViewBag.PaginaActual > 1)
+        {
+            <a asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual - 1)" asp-route-tamanio="@ViewBag.TamanioPagina" class="btn btn-outline-secondary btn-sm">Anterior</a>
+        }
+        else
+        {
+            <span class="btn btn-outline-secondary btn-sm disabled" aria-disabled="true">Anterior</span>
+        }
+        @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
+        {
+            <a asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual + 1)" asp-route-tamanio="@ViewBag.TamanioPagina" class="btn btn-outline-secondary btn-sm">Siguiente</a>
+        }
+        else
+        {
+            <span class="btn btn-outline-secondary btn-sm disabled" aria-disabled="true">Siguiente</span>
+        }
+    </nav>
 </div>
