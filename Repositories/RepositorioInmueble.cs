@@ -72,6 +72,18 @@ namespace InmobiliariaGrupoNN.Repositories
 
             return inmuebles;
         }
+        public int ObtenerTotal()
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                string sql = "SELECT COUNT(*) FROM Inmueble;";
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    connection.Open();
+                    return Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+        }
 
         // La búsqueda y el conteo comparten exactamente los mismos filtros.
         private const string FiltroDisponibles = @"

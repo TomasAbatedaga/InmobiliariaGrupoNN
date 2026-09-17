@@ -5,6 +5,7 @@ namespace InmobiliariaGrupoNN.Repositories
     public interface IRepositorioInmueble
     {
         IList<Inmueble> ObtenerTodos(int numeroPagina = 1, int tamanio = 10);
+        int ObtenerTotal();
 
         IList<Inmueble> BuscarDisponibles(DateTime fechaInicio, DateTime fechaFin,
             int? cupoMinimo, string? tipo, int numeroPagina = 1, int tamanio = 10);

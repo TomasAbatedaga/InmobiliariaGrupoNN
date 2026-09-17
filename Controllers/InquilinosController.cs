@@ -16,10 +16,20 @@ namespace InmobiliariaGrupoNN.Controllers
         }
 
         // GET: Inquilinos
-        public IActionResult Index()
+        [Authorize]
+        public IActionResult Index(int pagina = 1, int tamanio = 10)
         {
-            var lista = _repositorio.ObtenerTodos();
-            return View(lista);
+            var inquilinos = _repositorio.ObtenerTodos(pagina, tamanio);
+            
+            int totalRegistros = _repositorio.ObtenerTotal();
+            int totalPaginas = (int)Math.Ceiling((double)totalRegistros / tamanio);
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TamanioPagina = tamanio;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalRegistros;
+
+            return View(inquilinos);
         }
 
         // GET: Inquilinos/Create

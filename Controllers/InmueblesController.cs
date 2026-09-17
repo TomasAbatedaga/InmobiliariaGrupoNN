@@ -30,13 +30,21 @@ namespace InmobiliariaGrupoNN.Controllers
             _environment = environment;
         }
 
-        public IActionResult Index()
+        [Authorize]
+        public IActionResult Index(int pagina = 1, int tamanio = 10)
         {
-            var inmuebles = _repositorioInmueble.ObtenerTodos();
+            var inmuebles = _repositorioInmueble.ObtenerTodos(pagina, tamanio);
+            
+            int totalRegistros = _repositorioInmueble.ObtenerTotal();
+            int totalPaginas = (int)Math.Ceiling((double)totalRegistros / tamanio);
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TamanioPagina = tamanio;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalRegistros;
 
             return View(inmuebles);
         }
-
         public IActionResult Details(int id)
         {
             var inmueble = _repositorioInmueble.ObtenerPorId(id);

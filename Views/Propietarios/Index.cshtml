@@ -4,19 +4,26 @@
     ViewData["Title"] = "Listado de Propietarios";
 }
 
-<h1 class="mb-4">Listado de Propietarios</h1>
+<h2 class="mb-4">Gestión de Propietarios</h2>
 
-<!-- Barra superior con botón y selector -->
 <div class="d-flex justify-content-between align-items-center mb-3">
     <a asp-action="Create" class="btn btn-primary">Nuevo Propietario</a>
-
     <form asp-action="Index" method="get" class="d-flex align-items-center">
         <label class="me-2 fw-bold text-muted">Mostrar:</label>
         <select name="tamanio" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-            <option value="5" selected="@(ViewBag.TamanioPagina == 5 ? "selected" : null)">5 filas</option>
-            <option value="10" selected="@(ViewBag.TamanioPagina == 10 ? "selected" : null)">10 filas</option>
+            @foreach (var cantidad in new[] { 5, 10, 20 })
+            {
+                if (ViewBag.TamanioPagina == cantidad)
+                {
+                    <option value="@cantidad" selected="selected">@cantidad filas</option>
+                }
+                else
+                {
+                    <option value="@cantidad">@cantidad filas</option>
+                }
+            }
         </select>
-        <input type="hidden" name="pagina" value="@ViewBag.PaginaActual" />
+        <input type="hidden" name="pagina" value="1" />
     </form>
 </div>
 
@@ -25,51 +32,66 @@
         <tr>
             <th>DNI</th>
             <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Telefono</th>
+            <th>Teléfono</th>
             <th>Email</th>
-            <th>Alta</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var propietario in Model) {
-            <tr>
-                <td class="align-middle">@propietario.Dni</td>
-                <td class="align-middle">@propietario.Nombre</td>
-                <td class="align-middle">@propietario.Apellido</td>
-                <td class="align-middle">@propietario.Telefono</td>
-                <td class="align-middle">@propietario.Email</td>
-                <td class="align-middle">@propietario.FechaAlta.ToString("dd/MM/yyyy")</td>
-                <td class="align-middle">
-                    @if(propietario.EstadoActivo)
+        @if (!Model.Any())
+        {
+            <tr><td colspan="6" class="text-center text-muted">No hay propietarios registrados.</td></tr>
+        }
+        @foreach (var item in Model) {
+        <tr>
+            <td class="align-middle">@item.Dni</td>
+            <td class="align-middle">@item.Nombre @item.Apellido</td>
+            <td class="align-middle">@item.Telefono</td>
+            <td class="align-middle">@item.Email</td>
+            <td class="align-middle text-center">
+                @if (item.EstadoActivo)
+                {
+                    <span class="badge bg-success">Activo</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Inactivo</span>
+                }
+            </td>
+            <td class="align-middle text-center">
+                <div class="d-flex justify-content-center gap-2">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm px-2 text-white">Detalles</a> 
+                    @if (item.EstadoActivo)
                     {
-                        <span class="badge bg-success">Activo</span>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm px-2">Editar</a> 
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm px-2">Eliminar</a>
                     }
-                    else
-                    {
-                        <span class="badge bg-danger">
-                            Inactivo desde @(propietario.FechaBaja?.ToString("dd/MM/yyyy") ?? "-")
-                        </span>
-                    }
-                </td>
-                <td class="align-middle">
-                    <div class="d-flex gap-1">
-                        <a asp-action="Edit" asp-route-id="@propietario.Id" class="btn btn-warning btn-sm">Editar</a> 
-                        <a asp-action="Delete" asp-route-id="@propietario.Id" class="btn btn-danger btn-sm">Eliminar</a>
-                    </div>
-                </td>
-            </tr>
+                </div>
+            </td>
+        </tr>
         }
     </tbody>
 </table>
 
-<!-- Controles de Paginación -->
 <div class="d-flex justify-content-between align-items-center mt-3">
-    <span class="text-muted">Página @ViewBag.PaginaActual</span>
-    <div>
-        <a asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual - 1)" asp-route-tamanio="@ViewBag.TamanioPagina" class="btn btn-outline-secondary btn-sm @(ViewBag.PaginaActual <= 1 ? "disabled" : "")">Anterior</a>
-        <a asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual + 1)" asp-route-tamanio="@ViewBag.TamanioPagina" class="btn btn-outline-secondary btn-sm">Siguiente</a>
-    </div>
+    <span class="text-muted">Página @ViewBag.PaginaActual de @ViewBag.TotalPaginas — @ViewBag.TotalRegistros propietarios</span>
+    <nav aria-label="Páginas de propietarios">
+        @if (ViewBag.PaginaActual > 1)
+        {
+            <a asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual - 1)" asp-route-tamanio="@ViewBag.TamanioPagina" class="btn btn-outline-secondary btn-sm">Anterior</a>
+        }
+        else
+        {
+            <span class="btn btn-outline-secondary btn-sm disabled" aria-disabled="true">Anterior</span>
+        }
+        @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
+        {
+            <a asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual + 1)" asp-route-tamanio="@ViewBag.TamanioPagina" class="btn btn-outline-secondary btn-sm">Siguiente</a>
+        }
+        else
+        {
+            <span class="btn btn-outline-secondary btn-sm disabled" aria-disabled="true">Siguiente</span>
+        }
+    </nav>
 </div>

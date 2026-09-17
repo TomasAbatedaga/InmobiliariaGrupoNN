@@ -28,12 +28,18 @@ namespace InmobiliariaGrupoNN.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Index(int pagina = 1, int tamanio = 10)
         {
+            var usuarios = _repo.ObtenerTodos(pagina, tamanio);
+            
+            int totalRegistros = _repo.ObtenerTotal();
+            int totalPaginas = (int)Math.Ceiling((double)totalRegistros / tamanio);
+
             ViewBag.PaginaActual = pagina;
             ViewBag.TamanioPagina = tamanio;
-            var lista = _repo.ObtenerTodos(pagina, tamanio);
-            return View(lista);
-        }
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalRegistros;
 
+            return View(usuarios);
+        }
         // GET: Usuarios/Create
         [Authorize(Roles = "Administrador")]
         public IActionResult Create()

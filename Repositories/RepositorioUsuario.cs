@@ -54,6 +54,18 @@ namespace InmobiliariaGrupoNN.Repositories
             }
             return usuarios;
         }
+        public int ObtenerTotal()
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                string sql = "SELECT COUNT(*) FROM Usuario;";
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    connection.Open();
+                    return Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+        }
 
         public Usuario? ObtenerPorId(int id)
         {

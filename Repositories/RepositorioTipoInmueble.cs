@@ -56,6 +56,18 @@ namespace InmobiliariaGrupoNN.Repositories
             
             return tipos;
         }
+        public int ObtenerTotal()
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                string sql = "SELECT COUNT(*) FROM TipoInmueble;";
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    connection.Open();
+                    return Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+        }
 
         public TipoInmueble? ObtenerPorId(int id)
         {

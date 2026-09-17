@@ -16,13 +16,20 @@ namespace InmobiliariaGrupoNN.Controllers
         }
 
         // GET: TipoInmuebles
+        [Authorize]
         public IActionResult Index(int pagina = 1, int tamanio = 10)
         {
-            ViewBag.PaginaActual = pagina; 
-            ViewBag.TamanioPagina = tamanio;
+            var tipos = _repo.ObtenerTodos(pagina, tamanio);
+            
+            int totalRegistros = _repo.ObtenerTotal();
+            int totalPaginas = (int)Math.Ceiling((double)totalRegistros / tamanio);
 
-            var lista = _repo.ObtenerTodos(pagina, tamanio);
-            return View(lista);
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TamanioPagina = tamanio;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalRegistros;
+
+            return View(tipos);
         }
 
         // GET: TipoInmuebles/Create
