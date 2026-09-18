@@ -6,6 +6,8 @@ namespace InmobiliariaGrupoNN.Models
 {
     public class Reserva {
         public int Id { get; set; }
+        [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+        public bool EstadoActivo { get; set; } = true;
         public int InmuebleId { get; set; }
         public int InquilinoId { get; set; }
         public DateTime FechaInicio { get; set; }

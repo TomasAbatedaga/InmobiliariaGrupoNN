@@ -35,20 +35,23 @@
                      class="img-thumbnail"
                      style="max-width: 400px; max-height: 300px;" />
 
-                <form asp-controller="Inmuebles"
-                      asp-action="Portada"
-                      method="post"
-                      class="mt-2">
+                @if (User.IsInRole("Administrador"))
+                {
+                    <form asp-controller="Inmuebles"
+                          asp-action="EliminarPortada"
+                          method="post"
+                          class="mt-2">
 
-                    <input type="hidden"
-                           name="InmuebleId"
-                           value="@Model.Id" />
+                        <input type="hidden"
+                               name="InmuebleId"
+                               value="@Model.Id" />
 
-                    <button type="submit"
-                            class="btn btn-danger btn-sm">
-                        Eliminar Portada
-                    </button>
-                </form>
+                        <button type="submit"
+                                class="btn btn-danger btn-sm">
+                            Eliminar Portada
+                        </button>
+                    </form>
+                }
             </div>
         }
         else
@@ -101,20 +104,23 @@
                              class="img-thumbnail"
                              style="width: 150px; height: 150px; object-fit: cover;" />
 
-                        <form asp-controller="Imagenes"
-                              asp-action="Eliminar"
-                              method="post"
-                              class="mt-1">
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <form asp-controller="Imagenes"
+                                  asp-action="Eliminar"
+                                  method="post"
+                                  class="mt-1">
 
-                            <input type="hidden"
-                                   name="id"
-                                   value="@imagen.Id" />
+                                <input type="hidden"
+                                       name="id"
+                                       value="@imagen.Id" />
 
-                            <button type="submit"
-                                    class="btn btn-danger btn-sm">
-                                Eliminar
-                            </button>
-                        </form>
+                                <button type="submit"
+                                        class="btn btn-danger btn-sm">
+                                    Eliminar
+                                </button>
+                            </form>
+                        }
                     </div>
                 }
             </div>

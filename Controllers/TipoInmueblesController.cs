@@ -73,6 +73,7 @@ namespace InmobiliariaGrupoNN.Controllers
         }
 
         // GET: TipoInmuebles/Delete/5
+        [Authorize(Roles = "Administrador")]
         public IActionResult Delete(int id)
         {
             var tipo = _repo.ObtenerPorId(id);
@@ -84,6 +85,7 @@ namespace InmobiliariaGrupoNN.Controllers
         // POST: TipoInmuebles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult DeleteConfirmed(int id)
         {
             try

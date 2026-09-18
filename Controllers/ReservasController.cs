@@ -35,6 +35,7 @@ namespace InmobiliariaGrupoNN.Controllers
         // GET: Reservas/Details/id
         public IActionResult Details(int id)
         {
+            if (id <= 0) return NotFound();
             var reserva = _repoReserva.ObtenerPorId(id);
             if (reserva == null) return NotFound();
             
@@ -137,8 +138,10 @@ namespace InmobiliariaGrupoNN.Controllers
         // GET: Reservas/Edit/id
         public IActionResult Edit(int id)
         {
+            if (id <= 0) return NotFound();
             var reserva = _repoReserva.ObtenerPorId(id);
             if (reserva == null) return NotFound();
+            if (!reserva.EstadoActivo) return Conflict("La reserva está anulada.");
 
             ViewBag.Inmuebles = _repoInmueble.ObtenerTodos();
             ViewBag.Inquilinos = _repoInquilino.ObtenerTodos();
@@ -148,17 +151,25 @@ namespace InmobiliariaGrupoNN.Controllers
         // POST: Reservas/Edit/id
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int id, [FromForm] Reserva reserva)
+        public IActionResult Edit([FromRoute] int id, [FromForm, Bind("Id,InmuebleId,InquilinoId,FechaInicio,FechaFin,MontoPorDia")] Reserva reserva)
         {
             if (id <= 0 || id != reserva.Id) return BadRequest("El identificador de la reserva no coincide.");
-            if (_repoReserva.ObtenerPorId(id) == null) return NotFound();
+            var actual = _repoReserva.ObtenerPorId(id);
+            if (actual == null) return NotFound();
+            if (!actual.EstadoActivo) return Conflict("La reserva está anulada.");
             reserva.FechaInicio = reserva.FechaInicio.Date;
             reserva.FechaFin = reserva.FechaFin.Date;
             try
             {
                 if (ModelState.IsValid)
                 {
-                    _repoReserva.Modificacion(reserva);
+                    int filas = _repoReserva.Modificacion(reserva);
+                    if (filas == 0)
+                    {
+                        var vigente = _repoReserva.ObtenerPorId(id);
+                        if (vigente == null) return NotFound();
+                        if (!vigente.EstadoActivo) return Conflict("La reserva está anulada.");
+                    }
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -196,10 +207,13 @@ namespace InmobiliariaGrupoNN.Controllers
                 ModelState.AddModelError(nameof(Reserva.FechaFin), "La fecha de fin debe ser posterior a la de inicio.");
         }
         // GET: Reservas/Delete/id
+        [Authorize(Roles = "Administrador")]
         public IActionResult Delete(int id)
         {
+            if (id <= 0) return NotFound();
             var reserva = _repoReserva.ObtenerPorId(id);
             if (reserva == null) return NotFound();
+            if (!reserva.EstadoActivo) return Conflict("La reserva está anulada.");
             
             return View(reserva);
         }
@@ -207,8 +221,13 @@ namespace InmobiliariaGrupoNN.Controllers
         // POST: Reservas/Delete/id
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult DeleteConfirmed(int id)
         {
+            if (id <= 0) return NotFound();
+            var actual = _repoReserva.ObtenerPorId(id);
+            if (actual == null) return NotFound();
+            if (!actual.EstadoActivo) return Conflict("La reserva ya está anulada.");
             try
             {
                 int? anuladoPorId = null;
@@ -218,7 +237,11 @@ namespace InmobiliariaGrupoNN.Controllers
                 {
                     anuladoPorId = usuarioId;
                 }
-                _repoReserva.Baja(id, anuladoPorId);
+                if (_repoReserva.Baja(id, anuladoPorId) != 1)
+                {
+                    if (_repoReserva.ObtenerPorId(id) == null) return NotFound();
+                    return Conflict("La reserva ya está anulada. No se modificó su anulador.");
+                }
                 
                 return RedirectToAction(nameof(Index));
             }
@@ -233,8 +256,10 @@ namespace InmobiliariaGrupoNN.Controllers
         // GET: Reservas/Renovar/5
         public IActionResult Renovar(int id)
         {
+            if (id <= 0) return NotFound();
             var reservaOriginal = _repoReserva.ObtenerPorId(id);
             if (reservaOriginal == null) return NotFound();
+            if (!reservaOriginal.EstadoActivo) return Conflict("No se puede renovar una reserva anulada.");
 
             var nuevaReserva = new Reserva
             {
@@ -253,8 +278,17 @@ namespace InmobiliariaGrupoNN.Controllers
         // POST: Reservas/Renovar
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Renovar(Reserva nuevaReserva)
+        public IActionResult Renovar(int reservaOriginalId,
+            [Bind("FechaInicio,FechaFin,MontoPorDia")] Reserva nuevaReserva)
         {
+            if (reservaOriginalId <= 0) return NotFound();
+            var reservaOriginal = _repoReserva.ObtenerPorId(reservaOriginalId);
+            if (reservaOriginal == null) return NotFound();
+            if (!reservaOriginal.EstadoActivo) return Conflict("No se puede renovar una reserva anulada.");
+
+            nuevaReserva.InmuebleId = reservaOriginal.InmuebleId;
+            nuevaReserva.InquilinoId = reservaOriginal.InquilinoId;
+            ViewBag.ReservaOriginal = reservaOriginal;
             try
             {
                 if (nuevaReserva.FechaFin <= nuevaReserva.FechaInicio)
@@ -264,6 +298,11 @@ namespace InmobiliariaGrupoNN.Controllers
 
                 if (ModelState.IsValid)
                 {
+                    var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    if (int.TryParse(claimId, out int usuarioId))
+                    {
+                        nuevaReserva.CreadoPorId = usuarioId;
+                    }
                     _repoReserva.Alta(nuevaReserva);
                     TempData["Mensaje"] = "El contrato ha sido renovado exitosamente.";
                     return RedirectToAction(nameof(Index));

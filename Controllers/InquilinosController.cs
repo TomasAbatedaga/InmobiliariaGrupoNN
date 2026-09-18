@@ -78,6 +78,7 @@ namespace InmobiliariaGrupoNN.Controllers
         }
 
         // GET: Inquilinos/Delete/id
+        [Authorize(Roles = "Administrador")]
         public IActionResult Delete(int id)
         {
             var inquilino = _repositorio.ObtenerPorId(id);
@@ -90,6 +91,8 @@ namespace InmobiliariaGrupoNN.Controllers
 
         // POST: Inquilinos/Delete/id
         [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult DeleteConfirmed(int id)
         {
             _repositorio.Baja(id);

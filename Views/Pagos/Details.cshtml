@@ -20,7 +20,10 @@
     @if (Model.EstadoActivo)
     {
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar concepto</a>
-        <a asp-action="Anular" asp-route-id="@Model.Id" class="btn btn-danger">Anular</a>
+        @if (User.IsInRole("Administrador"))
+        {
+            <a asp-action="Anular" asp-route-id="@Model.Id" class="btn btn-danger">Anular</a>
+        }
     }
     <a asp-action="Index" asp-route-reservaId="@Model.ReservaId" class="btn btn-secondary">Volver a Pagos</a>
 </div>

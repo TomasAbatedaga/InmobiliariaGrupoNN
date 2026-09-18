@@ -76,7 +76,10 @@ namespace InmobiliariaGrupoNN.Repositories
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
-                string sql = "SELECT COUNT(*) FROM Inmueble;";
+                string sql = @"SELECT COUNT(*) FROM Inmueble i
+                    INNER JOIN Propietario p ON i.PropietarioId = p.Id
+                    INNER JOIN TipoInmueble t ON i.TipoInmuebleId = t.Id
+                    WHERE i.EstadoActivo = TRUE";
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     connection.Open();
@@ -96,6 +99,7 @@ namespace InmobiliariaGrupoNN.Repositories
               AND NOT EXISTS (
                   SELECT 1 FROM Reserva r
                   WHERE r.InmuebleId = i.Id
+                    AND r.EstadoActivo = TRUE
                     AND r.FechaInicio < @FechaFin
                     AND r.FechaFin > @FechaInicio
               )";

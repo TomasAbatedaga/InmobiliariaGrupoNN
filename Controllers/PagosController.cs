@@ -131,6 +131,7 @@ namespace InmobiliariaGrupoNN.Controllers
             }
         }
 
+        [Authorize(Roles = "Administrador")]
         public IActionResult Anular(int id)
         {
             var pago = BuscarPago(id);
@@ -141,6 +142,7 @@ namespace InmobiliariaGrupoNN.Controllers
 
         [HttpPost, ActionName("Anular")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult AnularConfirmed(int id)
         {
             var pago = BuscarPago(id);

@@ -80,7 +80,10 @@
                     @if (pago.EstadoActivo)
                     {
                         <a asp-action="Edit" asp-route-id="@pago.Id" class="btn btn-warning btn-sm">Editar concepto</a>
-                        <a asp-action="Anular" asp-route-id="@pago.Id" class="btn btn-danger btn-sm">Anular</a>
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <a asp-action="Anular" asp-route-id="@pago.Id" class="btn btn-danger btn-sm">Anular</a>
+                        }
                     }
                 </td>
             </tr>

@@ -127,6 +127,7 @@ namespace InmobiliariaGrupoNN.Controllers
             return View(inmueble);
         }
 
+        [Authorize(Roles = "Administrador")]
         public IActionResult Delete(int id)
         {
             var inmueble =
@@ -143,6 +144,7 @@ namespace InmobiliariaGrupoNN.Controllers
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult DeleteConfirmed(int id)
         {
             _repositorioInmueble.Baja(id);
@@ -180,6 +182,12 @@ namespace InmobiliariaGrupoNN.Controllers
                 return NotFound();
             }
 
+            if (imagen.Archivo == null || imagen.Archivo.Length == 0)
+            {
+                TempData["Error"] = "Debe seleccionar una imagen de portada.";
+                return RedirectToAction(nameof(Imagenes), new { id = imagen.InmuebleId });
+            }
+
             string carpeta = Path.Combine(
                 _environment.WebRootPath,
                 "Uploads",
@@ -199,21 +207,6 @@ namespace InmobiliariaGrupoNN.Controllers
                 {
                     System.IO.File.Delete(rutaAnterior);
                 }
-            }
-
-            if (imagen.Archivo == null ||
-                imagen.Archivo.Length == 0)
-            {
-                _repositorioInmueble.ModificarPortada(
-                    imagen.InmuebleId,
-                    null);
-
-                TempData["Mensaje"] =
-                    "Portada eliminada correctamente.";
-
-                return RedirectToAction(
-                    nameof(Imagenes),
-                    new { id = imagen.InmuebleId });
             }
 
             string extension =
@@ -249,6 +242,25 @@ namespace InmobiliariaGrupoNN.Controllers
             return RedirectToAction(
                 nameof(Imagenes),
                 new { id = imagen.InmuebleId });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Administrador")]
+        [ValidateAntiForgeryToken]
+        public IActionResult EliminarPortada(int inmuebleId)
+        {
+            var inmueble = _repositorioInmueble.ObtenerPorId(inmuebleId);
+            if (inmueble == null) return NotFound();
+
+            if (!string.IsNullOrEmpty(inmueble.Portada))
+            {
+                string ruta = ObtenerRutaFisica(inmueble.Portada);
+                if (System.IO.File.Exists(ruta)) System.IO.File.Delete(ruta);
+                _repositorioInmueble.ModificarPortada(inmuebleId, null);
+            }
+
+            TempData["Mensaje"] = "Portada eliminada correctamente.";
+            return RedirectToAction(nameof(Imagenes), new { id = inmuebleId });
         }
 
         private void CargarListas(

@@ -76,7 +76,10 @@
                     @if (item.EstadoActivo)
                     {
                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm px-2">Editar</a> 
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm px-2">Eliminar</a>
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm px-2">Eliminar</a>
+                        }
                     }
                 </div>
             </td>

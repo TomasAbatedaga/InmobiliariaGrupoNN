@@ -20,8 +20,7 @@
     <div class="col-md-6">
         <form asp-action="Renovar">
             
-            <input type="hidden" asp-for="InmuebleId" />
-            <input type="hidden" asp-for="InquilinoId" />
+            <input type="hidden" name="reservaOriginalId" value="@original?.Id" />
 
             <div class="row mb-3">
                 <div class="col">

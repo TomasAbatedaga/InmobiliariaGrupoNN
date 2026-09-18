@@ -12,6 +12,8 @@
     </div>
     <div class="card-body">
         <dl class="row mb-0">
+            <dt class="col-sm-3 text-muted">Estado</dt>
+            <dd class="col-sm-9">@(Model.EstadoActivo ? "Activa" : "Anulada")</dd>
             <dt class="col-sm-3 text-muted">Inmueble (Dirección)</dt>
             <dd class="col-sm-9 fw-bold">@Model.Inmueble?.Direccion</dd>
 
@@ -32,6 +34,9 @@
 
 <div class="mt-4">
     <a asp-controller="Pagos" asp-action="Index" asp-route-reservaId="@Model.Id" class="btn btn-primary me-2">Ver Pagos</a>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+    @if (Model.EstadoActivo)
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+    }
     <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
 </div>

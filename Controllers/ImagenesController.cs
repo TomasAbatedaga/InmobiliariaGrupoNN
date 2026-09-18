@@ -90,6 +90,7 @@ namespace InmobiliariaGrupoNN.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public IActionResult Eliminar(
             int id,
             [FromServices] IWebHostEnvironment environment)

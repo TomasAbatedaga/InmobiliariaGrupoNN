@@ -31,10 +31,11 @@ namespace InmobiliariaGrupoNN.Repositories
                     string sql = @"
                         SELECT r.Id, r.InmuebleId, r.InquilinoId, r.FechaInicio, r.FechaFin, r.MontoPorDia,
                                i.Direccion,
-                               inq.Nombre AS NombreInquilino, inq.Apellido AS ApellidoInquilino
+                               inq.Nombre AS NombreInquilino, inq.Apellido AS ApellidoInquilino, r.EstadoActivo
                         FROM Reserva r
                         INNER JOIN Inmueble i ON r.InmuebleId = i.Id
                         INNER JOIN Inquilino inq ON r.InquilinoId = inq.Id
+                        WHERE r.EstadoActivo = TRUE
                         ORDER BY r.Id DESC
                         LIMIT @tamanio OFFSET @offset";
 
@@ -56,6 +57,7 @@ namespace InmobiliariaGrupoNN.Repositories
                                     FechaInicio = reader.GetDateTime(3),
                                     FechaFin = reader.GetDateTime(4),
                                     MontoPorDia = reader.GetDecimal(5),
+                                    EstadoActivo = reader.GetBoolean(9),
                                     Inmueble = new Inmueble { Direccion = reader.GetString(6) },
                                     Inquilino = new Inquilino 
                                     { 
@@ -79,7 +81,7 @@ namespace InmobiliariaGrupoNN.Repositories
         public int ObtenerCantidad()
         {
             using var connection = new MySqlConnection(_connectionString);
-            using var command = new MySqlCommand("SELECT COUNT(*) FROM Reserva", connection);
+            using var command = new MySqlCommand("SELECT COUNT(*) FROM Reserva WHERE EstadoActivo = TRUE", connection);
             connection.Open();
             return Convert.ToInt32(command.ExecuteScalar());
         }
@@ -96,7 +98,7 @@ namespace InmobiliariaGrupoNN.Repositories
                     string sql = @"
                         SELECT r.Id, r.InmuebleId, r.InquilinoId, r.FechaInicio, r.FechaFin, r.MontoPorDia,
                                i.Direccion,
-                               inq.Nombre AS NombreInquilino, inq.Apellido AS ApellidoInquilino
+                               inq.Nombre AS NombreInquilino, inq.Apellido AS ApellidoInquilino, r.EstadoActivo
                         FROM Reserva r
                         INNER JOIN Inmueble i ON r.InmuebleId = i.Id
                         INNER JOIN Inquilino inq ON r.InquilinoId = inq.Id
@@ -118,6 +120,7 @@ namespace InmobiliariaGrupoNN.Repositories
                                     FechaInicio = reader.GetDateTime(3),
                                     FechaFin = reader.GetDateTime(4),
                                     MontoPorDia = reader.GetDecimal(5),
+                                    EstadoActivo = reader.GetBoolean(9),
                                     Inmueble = new Inmueble { Direccion = reader.GetString(6) },
                                     Inquilino = new Inquilino 
                                     { 
@@ -142,6 +145,7 @@ namespace InmobiliariaGrupoNN.Repositories
         {
             ArgumentNullException.ThrowIfNull(reserva);
             reserva.Id = 0;
+            reserva.EstadoActivo = true;
             ValidarReserva(reserva);
             ValidarInmuebleParaAlta(reserva.InmuebleId);
             ValidarDisponibilidad(reserva);
@@ -152,8 +156,8 @@ namespace InmobiliariaGrupoNN.Repositories
                 using (var connection = new MySqlConnection(_connectionString))
                 {
                     string sql = @"INSERT INTO Reserva 
-                                    (InmuebleId, InquilinoId, FechaInicio, FechaFin, MontoPorDia, CreadoPorId) 
-                                    VALUES (@InmuebleId, @InquilinoId, @FechaInicio, @FechaFin, @MontoPorDia, @CreadoPorId);
+                                    (InmuebleId, InquilinoId, FechaInicio, FechaFin, MontoPorDia, CreadoPorId, EstadoActivo)
+                                    VALUES (@InmuebleId, @InquilinoId, @FechaInicio, @FechaFin, @MontoPorDia, @CreadoPorId, TRUE);
                                     SELECT LAST_INSERT_ID();";
                     using (var command = new MySqlCommand(sql, connection))
                     {
@@ -191,7 +195,7 @@ namespace InmobiliariaGrupoNN.Repositories
                     string sql = @"UPDATE Reserva 
                                    SET InmuebleId = @inmuebleId, InquilinoId = @inquilinoId, 
                                        FechaInicio = @fechaInicio, FechaFin = @fechaFin, MontoPorDia = @montoPorDia 
-                                   WHERE Id = @id";
+                                   WHERE Id = @id AND EstadoActivo = TRUE";
                     using (var command = new MySqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@inmuebleId", reserva.InmuebleId);
@@ -222,7 +226,7 @@ namespace InmobiliariaGrupoNN.Repositories
             {
                 string sql = @"UPDATE Reserva 
                                 SET EstadoActivo = 0, AnuladoPorId = @AnuladoPorId 
-                                WHERE Id = @Id;";
+                                WHERE Id = @Id AND EstadoActivo = TRUE;";
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
@@ -283,7 +287,8 @@ namespace InmobiliariaGrupoNN.Repositories
             using (var connection = new MySqlConnection(_connectionString))
             {
                 string sql = @"SELECT COUNT(*) FROM Reserva 
-                               WHERE InmuebleId = @inmuebleId 
+                               WHERE InmuebleId = @inmuebleId
+                               AND EstadoActivo = TRUE
                                AND FechaInicio < @fechaFin 
                                AND FechaFin > @fechaInicio
                                AND Id != @id";
