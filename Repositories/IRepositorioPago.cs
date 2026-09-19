@@ -1,4 +1,5 @@
 using InmobiliariaGrupoNN.Models;
+using MySqlConnector;
 
 namespace InmobiliariaGrupoNN.Repositories
 {
@@ -14,9 +15,10 @@ namespace InmobiliariaGrupoNN.Repositories
         Pago? ObtenerPorId(int id);
 
         int Alta(Pago pago);
+        int Alta(Pago pago, MySqlConnection connection, MySqlTransaction? transaction);
 
         int ModificarConcepto(int id, string concepto);
 
-        int Anular(int id);
+        int Anular(int id, int anuladoPorId);
     }
 }

@@ -1,0 +1,37 @@
+@model InmobiliariaGrupoNN.Models.FinalizarReservaViewModel
+@{
+    ViewData["Title"] = "Finalizar anticipadamente";
+    var minima = Model.Reserva.FechaInicio.Date > DateTime.Today ? Model.Reserva.FechaInicio.Date : DateTime.Today;
+}
+<h2>Finalizar anticipadamente la Reserva #@Model.Reserva.Id</h2>
+<div asp-validation-summary="All" class="text-danger" role="alert"></div>
+<dl class="row">
+    <dt class="col-sm-4">Inicio contractual</dt><dd class="col-sm-8">@Model.Reserva.FechaInicio.ToString("dd/MM/yyyy")</dd>
+    <dt class="col-sm-4">Fin contractual original (exclusivo)</dt><dd class="col-sm-8">@Model.Reserva.FechaFin.ToString("dd/MM/yyyy")</dd>
+    <dt class="col-sm-4">Monto por día</dt><dd class="col-sm-8">$ @Model.Reserva.MontoPorDia.ToString("N2")</dd>
+</dl>
+<form asp-action="Finalizar" asp-route-id="@Model.Reserva.Id" method="get" class="mb-3">
+    <label asp-for="FechaFinalizacion" class="form-label">Fecha efectiva de finalización (fin exclusivo)</label>
+    <input asp-for="FechaFinalizacion" type="date" class="form-control" required
+           min="@minima.ToString("yyyy-MM-dd")" max="@Model.Reserva.FechaFin.AddDays(-1).ToString("yyyy-MM-dd")" />
+    <button type="submit" class="btn btn-secondary mt-2">Calcular multa para esta fecha</button>
+</form>
+@if (Model.CalculoValido)
+{
+    <div class="card card-body mb-3">
+        <dl class="row mb-0">
+            <dt class="col-sm-4">Fecha efectiva calculada</dt><dd class="col-sm-8">@Model.FechaFinalizacion.ToString("dd/MM/yyyy")</dd>
+            <dt class="col-sm-4">Duración original</dt><dd class="col-sm-8">@Model.DuracionOriginal días</dd>
+            <dt class="col-sm-4">Días transcurridos</dt><dd class="col-sm-8">@Model.DiasTranscurridos</dd>
+            <dt class="col-sm-4">Días restantes</dt><dd class="col-sm-8">@Model.DiasRestantes</dd>
+            <dt class="col-sm-4">Porcentaje de multa</dt><dd class="col-sm-8">@Model.PorcentajeMulta.ToString("N0") %</dd>
+            <dt class="col-sm-4">Multa a registrar</dt><dd class="col-sm-8">$ @Model.ImporteMulta.ToString("N2")</dd>
+        </dl>
+    </div>
+    <p>La confirmación registra el pago de la multa para la fecha calculada. No modifica el fin contractual ni devuelve pagos anteriores.</p>
+    <form asp-action="Finalizar" asp-route-id="@Model.Reserva.Id" method="post">
+        <input type="hidden" name="fechaFinalizacion" value="@Model.FechaFinalizacion.ToString("yyyy-MM-dd")" />
+        <button type="submit" class="btn btn-warning">Confirmar y pagar multa</button>
+    </form>
+}
+<a asp-action="Details" asp-route-id="@Model.Reserva.Id" class="btn btn-secondary mt-3">Volver a la Reserva</a>

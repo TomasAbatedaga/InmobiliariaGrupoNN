@@ -9,6 +9,16 @@
         <dt class="col-sm-3">Concepto</dt><dd class="col-sm-9">@Model.Concepto</dd>
         <dt class="col-sm-3">Fecha del pago</dt><dd class="col-sm-9">@Model.FechaPago.ToString("dd/MM/yyyy")</dd>
         <dt class="col-sm-3">Importe</dt><dd class="col-sm-9">$ @Model.Importe.ToString("N2")</dd>
+        @if (User.IsInRole("Administrador"))
+        {
+            <dt class="col-sm-3">Creado por</dt>
+            <dd class="col-sm-9">@(Model.CreadoPor?.NombreCompleto ?? Model.CreadoPorId?.ToString() ?? "Sin registro histórico")</dd>
+            @if (Model.AnuladoPorId.HasValue)
+            {
+                <dt class="col-sm-3">Anulado por</dt>
+                <dd class="col-sm-9">@(Model.AnuladoPor?.NombreCompleto ?? Model.AnuladoPorId.ToString())</dd>
+            }
+        }
         <dt class="col-sm-3">Estado</dt><dd class="col-sm-9"><span class="badge @(Model.EstadoActivo ? "bg-success" : "bg-danger")">@(Model.EstadoActivo ? "Activo" : "Anulado")</span></dd>
         @if (Model.FechaAnulacion.HasValue)
         {

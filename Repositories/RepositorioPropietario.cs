@@ -20,12 +20,12 @@ namespace InmobiliariaGrupoNN.Repositories
             if (numeroPagina < 1) numeroPagina = 1;
             if (tamanio < 1) tamanio = 10;
 
-            int offset = (numeroPagina - 1) * tamanio;
+            long offset = ((long)numeroPagina - 1) * tamanio;
             var propietarios = new List<Propietario>();
 
             using (var connection = new MySqlConnection(_connectionString))
             {
-                string sql = "SELECT Id, Dni, Nombre, Apellido, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario LIMIT @tamanio OFFSET @offset";
+                string sql = "SELECT Id, Dni, Nombre, Apellido, Telefono, Email, EstadoActivo, FechaAlta, FechaBaja FROM Propietario ORDER BY Id LIMIT @tamanio OFFSET @offset";
                 
                 using (var command = new MySqlCommand(sql, connection))
                 {

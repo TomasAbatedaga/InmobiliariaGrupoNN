@@ -33,10 +33,11 @@ namespace InmobiliariaGrupoNN.Controllers
         [Authorize]
         public IActionResult Index(int pagina = 1, int tamanio = 10)
         {
-            var inmuebles = _repositorioInmueble.ObtenerTodos(pagina, tamanio);
-            
+            if (tamanio != 5 && tamanio != 10 && tamanio != 20) tamanio = 10;
             int totalRegistros = _repositorioInmueble.ObtenerTotal();
-            int totalPaginas = (int)Math.Ceiling((double)totalRegistros / tamanio);
+            int totalPaginas = Math.Max(1, (int)Math.Ceiling(totalRegistros / (decimal)tamanio));
+            pagina = Math.Clamp(pagina, 1, totalPaginas);
+            var inmuebles = _repositorioInmueble.ObtenerTodos(pagina, tamanio);
 
             ViewBag.PaginaActual = pagina;
             ViewBag.TamanioPagina = tamanio;

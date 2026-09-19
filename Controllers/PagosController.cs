@@ -10,11 +10,13 @@ namespace InmobiliariaGrupoNN.Controllers
     public class PagosController : Controller
     {
         private readonly IRepositorioPago _repoPago;
+        private readonly IRepositorioUsuario _repoUsuario;
         private readonly IRepositorioReserva _repoReserva;
 
-        public PagosController(IRepositorioPago repoPago, IRepositorioReserva repoReserva)
+        public PagosController(IRepositorioPago repoPago, IRepositorioReserva repoReserva, IRepositorioUsuario repoUsuario)
         {
             _repoPago = repoPago;
+            _repoUsuario = repoUsuario;
             _repoReserva = repoReserva;
         }
 
@@ -50,8 +52,11 @@ namespace InmobiliariaGrupoNN.Controllers
             if (reservaId <= 0) return BadRequest("La reserva no es válida.");
             var reserva = _repoReserva.ObtenerPorId(reservaId);
             if (reserva == null) return NotFound();
+            var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(claimId, out int usuarioId) || usuarioId <= 0) return Forbid();
             var pago = new Pago
             {
+                CreadoPorId = usuarioId,
                 ReservaId = reservaId,
                 Reserva = reserva,
                 Concepto = concepto ?? "",
@@ -85,6 +90,11 @@ namespace InmobiliariaGrupoNN.Controllers
         {
             var pago = BuscarPago(id);
             if (pago == null) return NotFound();
+            if (User.IsInRole("Administrador"))
+            {
+                if (pago.CreadoPorId.HasValue) pago.CreadoPor = _repoUsuario.ObtenerPorId(pago.CreadoPorId.Value);
+                if (pago.AnuladoPorId.HasValue) pago.AnuladoPor = _repoUsuario.ObtenerPorId(pago.AnuladoPorId.Value);
+            }
             return View(pago);
         }
 
@@ -150,7 +160,9 @@ namespace InmobiliariaGrupoNN.Controllers
             if (!pago.EstadoActivo) return PagoAnulado(pago.ReservaId);
             try
             {
-                int filas = _repoPago.Anular(id);
+                var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(claimId, out int usuarioId) || usuarioId <= 0) return Forbid();
+                int filas = _repoPago.Anular(id, usuarioId);
                 TempData[filas == 1 ? "Mensaje" : "Error"] = filas == 1
                     ? "Pago anulado correctamente. El registro permanece en el listado."
                     : "El pago ya estaba anulado o no se pudo anular. No se modificó su fecha de anulación.";

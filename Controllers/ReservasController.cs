@@ -10,15 +10,18 @@ namespace InmobiliariaGrupoNN.Controllers
     public class ReservasController : Controller
     {
         private readonly IRepositorioReserva _repoReserva;
+        private readonly IRepositorioUsuario _repoUsuario;
         private readonly IRepositorioInmueble _repoInmueble;
         private readonly IRepositorioInquilino _repoInquilino;
 
         public ReservasController(
             IRepositorioReserva repoReserva, 
             IRepositorioInmueble repoInmueble, 
-            IRepositorioInquilino repoInquilino)
+            IRepositorioInquilino repoInquilino,
+            IRepositorioUsuario repoUsuario)
         {
             _repoReserva = repoReserva;
+            _repoUsuario = repoUsuario;
             _repoInmueble = repoInmueble;
             _repoInquilino = repoInquilino;
         }
@@ -39,6 +42,12 @@ namespace InmobiliariaGrupoNN.Controllers
             var reserva = _repoReserva.ObtenerPorId(id);
             if (reserva == null) return NotFound();
             
+            if (User.IsInRole("Administrador"))
+            {
+                if (reserva.CreadoPorId.HasValue) reserva.CreadoPor = _repoUsuario.ObtenerPorId(reserva.CreadoPorId.Value);
+                if (reserva.FinalizadoPorId.HasValue) reserva.FinalizadoPor = _repoUsuario.ObtenerPorId(reserva.FinalizadoPorId.Value);
+                if (reserva.AnuladoPorId.HasValue) reserva.AnuladoPor = _repoUsuario.ObtenerPorId(reserva.AnuladoPorId.Value);
+            }
             return View(reserva);
         }
 
@@ -117,10 +126,8 @@ namespace InmobiliariaGrupoNN.Controllers
                 if (ModelState.IsValid)
                 {
                     var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                    if (int.TryParse(claimId, out int usuarioId))
-                    {
-                        reserva.CreadoPorId = usuarioId;
-                    }
+                    if (!int.TryParse(claimId, out int usuarioId) || usuarioId <= 0) return Forbid();
+                    reserva.CreadoPorId = usuarioId;
                     _repoReserva.Alta(reserva);
                     return RedirectToAction(nameof(Index));
                 }
@@ -141,6 +148,7 @@ namespace InmobiliariaGrupoNN.Controllers
             if (id <= 0) return NotFound();
             var reserva = _repoReserva.ObtenerPorId(id);
             if (reserva == null) return NotFound();
+            if (reserva.FechaFinalizacion.HasValue) return Conflict("No puede editarse una reserva finalizada anticipadamente.");
             if (!reserva.EstadoActivo) return Conflict("La reserva está anulada.");
 
             ViewBag.Inmuebles = _repoInmueble.ObtenerTodos();
@@ -156,6 +164,7 @@ namespace InmobiliariaGrupoNN.Controllers
             if (id <= 0 || id != reserva.Id) return BadRequest("El identificador de la reserva no coincide.");
             var actual = _repoReserva.ObtenerPorId(id);
             if (actual == null) return NotFound();
+            if (actual.FechaFinalizacion.HasValue) return Conflict("No puede editarse una reserva finalizada anticipadamente.");
             if (!actual.EstadoActivo) return Conflict("La reserva está anulada.");
             reserva.FechaInicio = reserva.FechaInicio.Date;
             reserva.FechaFin = reserva.FechaFin.Date;
@@ -168,6 +177,7 @@ namespace InmobiliariaGrupoNN.Controllers
                     {
                         var vigente = _repoReserva.ObtenerPorId(id);
                         if (vigente == null) return NotFound();
+                        if (vigente.FechaFinalizacion.HasValue) return Conflict("No puede editarse una reserva finalizada anticipadamente.");
                         if (!vigente.EstadoActivo) return Conflict("La reserva está anulada.");
                     }
                     return RedirectToAction(nameof(Index));
@@ -181,6 +191,59 @@ namespace InmobiliariaGrupoNN.Controllers
             ViewBag.Inmuebles = _repoInmueble.ObtenerTodos();
             ViewBag.Inquilinos = _repoInquilino.ObtenerTodos();
             return View(reserva);
+        }
+
+        public IActionResult Finalizar(int id, DateTime? fechaFinalizacion)
+        {
+            if (id <= 0) return NotFound();
+            var reserva = _repoReserva.ObtenerPorId(id);
+            if (reserva == null) return NotFound();
+            if (!reserva.EstadoActivo || reserva.FechaFinalizacion.HasValue || reserva.FechaFin.Date <= DateTime.Today)
+                return Conflict("La reserva no admite una nueva finalización anticipada.");
+            return View(PrepararFinalizacion(reserva, fechaFinalizacion));
+        }
+
+        [HttpPost, ActionName("Finalizar")]
+        [ValidateAntiForgeryToken]
+        public IActionResult FinalizarConfirmed(int id, DateTime? fechaFinalizacion)
+        {
+            if (id <= 0) return NotFound();
+            var reserva = _repoReserva.ObtenerPorId(id);
+            if (reserva == null) return NotFound();
+            if (!reserva.EstadoActivo || reserva.FechaFinalizacion.HasValue || reserva.FechaFin.Date <= DateTime.Today)
+                return Conflict("La reserva no admite una nueva finalización anticipada.");
+            var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(claimId, out int usuarioId) || usuarioId <= 0) return Forbid();
+            if (!fechaFinalizacion.HasValue)
+                ModelState.AddModelError(nameof(fechaFinalizacion), "Debe elegir la fecha efectiva.");
+            var modelo = PrepararFinalizacion(reserva, fechaFinalizacion);
+            if (!ModelState.IsValid) return View("Finalizar", modelo);
+            try
+            {
+                _repoReserva.Finalizar(id, fechaFinalizacion!.Value.Date, usuarioId);
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View("Finalizar", modelo);
+            }
+        }
+
+        private FinalizarReservaViewModel PrepararFinalizacion(Reserva reserva, DateTime? fecha)
+        {
+            DateTime efectiva = fecha?.Date ?? (reserva.FechaInicio.Date > DateTime.Today ? reserva.FechaInicio.Date : DateTime.Today);
+            try
+            {
+                var modelo = CalculosReserva.CalcularFinalizacion(reserva, efectiva, DateTime.Today);
+                modelo.CalculoValido = ModelState.IsValid;
+                return modelo;
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return new FinalizarReservaViewModel { Reserva = reserva, FechaFinalizacion = efectiva };
+            }
         }
 
         private static int NormalizarTamanio(int tamanio) =>
@@ -299,10 +362,8 @@ namespace InmobiliariaGrupoNN.Controllers
                 if (ModelState.IsValid)
                 {
                     var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                    if (int.TryParse(claimId, out int usuarioId))
-                    {
-                        nuevaReserva.CreadoPorId = usuarioId;
-                    }
+                    if (!int.TryParse(claimId, out int usuarioId) || usuarioId <= 0) return Forbid();
+                    nuevaReserva.CreadoPorId = usuarioId;
                     _repoReserva.Alta(nuevaReserva);
                     TempData["Mensaje"] = "El contrato ha sido renovado exitosamente.";
                     return RedirectToAction(nameof(Index));

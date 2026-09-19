@@ -26,6 +26,13 @@ namespace InmobiliariaGrupoNN.Models
 
         public DateTime? FechaAnulacion { get; set; }
 
+        [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+        public int? CreadoPorId { get; set; }
+        [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+        public int? AnuladoPorId { get; set; }
+        public Usuario? CreadoPor { get; set; }
+        public Usuario? AnuladoPor { get; set; }
+
         public Reserva? Reserva { get; set; }
     }
 }

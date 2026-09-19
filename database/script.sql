@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS Inmueble (
     TipoInmuebleId INT NOT NULL,
     FOREIGN KEY (PropietarioId) REFERENCES Propietario(Id),
     FOREIGN KEY (TipoInmuebleId) REFERENCES TipoInmueble(Id)
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS Imagen (
     Id INT AUTO_INCREMENT PRIMARY KEY,
@@ -78,12 +78,15 @@ CREATE TABLE IF NOT EXISTS Reserva (
     MontoPorDia DECIMAL(10,2) NOT NULL,
     CreadoPorId INT NULL,
     AnuladoPorId INT NULL,
+    FechaFinalizacion DATE NULL,
+    FinalizadoPorId INT NULL,
     EstadoActivo BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (InmuebleId) REFERENCES Inmueble(Id),
     FOREIGN KEY (InquilinoId) REFERENCES Inquilino(Id),
     FOREIGN KEY (CreadoPorId) REFERENCES Usuario(Id),
-    FOREIGN KEY (AnuladoPorId) REFERENCES Usuario(Id)
-);
+    FOREIGN KEY (AnuladoPorId) REFERENCES Usuario(Id),
+    CONSTRAINT FK_Reserva_FinalizadoPor FOREIGN KEY (FinalizadoPorId) REFERENCES Usuario(Id)
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS Pago (
     Id INT AUTO_INCREMENT PRIMARY KEY,
@@ -93,9 +96,13 @@ CREATE TABLE IF NOT EXISTS Pago (
     Importe DECIMAL(10,2) NOT NULL,
     EstadoActivo BOOLEAN NOT NULL DEFAULT TRUE,
     FechaAnulacion DATETIME NULL,
+    CreadoPorId INT NULL,
+    AnuladoPorId INT NULL,
     INDEX IX_Pago_ReservaId_Id (ReservaId, Id),
-    FOREIGN KEY (ReservaId) REFERENCES Reserva(Id)
-);
+    FOREIGN KEY (ReservaId) REFERENCES Reserva(Id),
+    CONSTRAINT FK_Pago_CreadoPor FOREIGN KEY (CreadoPorId) REFERENCES Usuario(Id),
+    CONSTRAINT FK_Pago_AnuladoPor FOREIGN KEY (AnuladoPorId) REFERENCES Usuario(Id)
+) ENGINE=InnoDB;
 
 
 -- ==========================================

@@ -18,7 +18,7 @@ namespace InmobiliariaGrupoNN.Repositories
             if (numeroPagina < 1) numeroPagina = 1;
             if (tamanio < 1) tamanio = 10;
 
-            int offset = (numeroPagina - 1) * tamanio;
+            long offset = ((long)numeroPagina - 1) * tamanio;
             var lista = new List<Inquilino>();
 
             using (var connection = new MySqlConnection(connectionString))
@@ -26,6 +26,7 @@ namespace InmobiliariaGrupoNN.Repositories
                 var sql = @"SELECT Id, Dni, Nombre, Apellido, Telefono, Email,
                                 EstadoActivo, FechaAlta, FechaBaja
                             FROM Inquilino
+                            ORDER BY Id
                             LIMIT @tamanio OFFSET @offset";
 
                 using (var command = new MySqlCommand(sql, connection))

@@ -20,7 +20,7 @@ namespace InmobiliariaGrupoNN.Repositories
             if (tamanio < 1) tamanio = 10;
             var pagos = new List<Pago>();
             using var connection = new MySqlConnection(_connectionString);
-            using var command = new MySqlCommand(@"SELECT Id, ReservaId, Concepto, FechaPago, Importe, EstadoActivo, FechaAnulacion
+            using var command = new MySqlCommand(@"SELECT Id, ReservaId, Concepto, FechaPago, Importe, EstadoActivo, FechaAnulacion, CreadoPorId, AnuladoPorId
                 FROM Pago WHERE ReservaId = @ReservaId ORDER BY Id DESC LIMIT @Tamanio OFFSET @Offset", connection);
             command.Parameters.AddWithValue("@ReservaId", reservaId);
             command.Parameters.AddWithValue("@Tamanio", tamanio);
@@ -45,7 +45,7 @@ namespace InmobiliariaGrupoNN.Repositories
         {
             ValidarId(id);
             using var connection = new MySqlConnection(_connectionString);
-            using var command = new MySqlCommand(@"SELECT Id, ReservaId, Concepto, FechaPago, Importe, EstadoActivo, FechaAnulacion
+            using var command = new MySqlCommand(@"SELECT Id, ReservaId, Concepto, FechaPago, Importe, EstadoActivo, FechaAnulacion, CreadoPorId, AnuladoPorId
                 FROM Pago WHERE Id = @Id", connection);
             command.Parameters.AddWithValue("@Id", id);
             connection.Open();
@@ -55,8 +55,17 @@ namespace InmobiliariaGrupoNN.Repositories
 
         public int Alta(Pago pago)
         {
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            return Alta(pago, connection, null);
+        }
+
+        // El llamador conserva la propiedad de la conexión y de la transacción.
+        public int Alta(Pago pago, MySqlConnection connection, MySqlTransaction? transaction)
+        {
             ArgumentNullException.ThrowIfNull(pago);
             ValidarId(pago.ReservaId);
+            ValidarId(pago.CreadoPorId ?? 0);
             string concepto = ValidarConcepto(pago.Concepto);
             if (pago.FechaPago.Date < new DateTime(1000, 1, 1))
                 throw new ArgumentException("La fecha del pago no es válida para MySQL.");
@@ -65,22 +74,22 @@ namespace InmobiliariaGrupoNN.Repositories
             if (decimal.Round(pago.Importe, 2) != pago.Importe)
                 throw new ArgumentException("El importe debe tener como máximo dos decimales.");
 
-            using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(@"INSERT INTO Pago
-                (ReservaId, Concepto, FechaPago, Importe, EstadoActivo, FechaAnulacion)
-                VALUES (@ReservaId, @Concepto, @FechaPago, @Importe, TRUE, NULL);
-                SELECT LAST_INSERT_ID();", connection);
+                (ReservaId, Concepto, FechaPago, Importe, EstadoActivo, FechaAnulacion, CreadoPorId)
+                VALUES (@ReservaId, @Concepto, @FechaPago, @Importe, TRUE, NULL, @CreadoPorId);
+                SELECT LAST_INSERT_ID();", connection, transaction);
             command.Parameters.AddWithValue("@ReservaId", pago.ReservaId);
             command.Parameters.AddWithValue("@Concepto", concepto);
             command.Parameters.AddWithValue("@FechaPago", pago.FechaPago.Date);
             command.Parameters.AddWithValue("@Importe", pago.Importe);
-            connection.Open();
+            command.Parameters.AddWithValue("@CreadoPorId", pago.CreadoPorId);
             
             pago.Id = Convert.ToInt32(command.ExecuteScalar());
             pago.Concepto = concepto;
             pago.FechaPago = pago.FechaPago.Date;
             pago.EstadoActivo = true;
             pago.FechaAnulacion = null;
+            pago.AnuladoPorId = null;
             return pago.Id;
         }
 
@@ -97,13 +106,15 @@ namespace InmobiliariaGrupoNN.Repositories
             return command.ExecuteNonQuery();
         }
 
-        public int Anular(int id)
+        public int Anular(int id, int anuladoPorId)
         {
             ValidarId(id);
+            ValidarId(anuladoPorId);
             using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(@"UPDATE Pago SET EstadoActivo = FALSE,
-                FechaAnulacion = CURRENT_TIMESTAMP WHERE Id = @Id AND EstadoActivo = TRUE", connection);
+                FechaAnulacion = CURRENT_TIMESTAMP, AnuladoPorId = @AnuladoPorId WHERE Id = @Id AND EstadoActivo = TRUE", connection);
             command.Parameters.AddWithValue("@Id", id);
+            command.Parameters.AddWithValue("@AnuladoPorId", anuladoPorId);
             connection.Open();
             return command.ExecuteNonQuery();
         }
@@ -116,6 +127,8 @@ namespace InmobiliariaGrupoNN.Repositories
             FechaPago = reader.GetDateTime("FechaPago"),
             Importe = reader.GetDecimal("Importe"),
             EstadoActivo = reader.GetBoolean("EstadoActivo"),
+            CreadoPorId = reader.IsDBNull(reader.GetOrdinal("CreadoPorId")) ? null : reader.GetInt32("CreadoPorId"),
+            AnuladoPorId = reader.IsDBNull(reader.GetOrdinal("AnuladoPorId")) ? null : reader.GetInt32("AnuladoPorId"),
             FechaAnulacion = reader.IsDBNull(reader.GetOrdinal("FechaAnulacion"))
                 ? null : reader.GetDateTime("FechaAnulacion")
         };

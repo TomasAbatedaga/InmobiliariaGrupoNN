@@ -13,7 +13,7 @@
     <div class="card-body">
         <dl class="row mb-0">
             <dt class="col-sm-3 text-muted">Estado</dt>
-            <dd class="col-sm-9">@(Model.EstadoActivo ? "Activa" : "Anulada")</dd>
+            <dd class="col-sm-9">@(!Model.EstadoActivo ? "Anulada" : Model.FechaFinalizacion.HasValue ? (Model.FechaFinalizacion.Value.Date > DateTime.Today ? "Finalización anticipada programada" : "Finalizada anticipadamente") : "Activa")</dd>
             <dt class="col-sm-3 text-muted">Inmueble (Dirección)</dt>
             <dd class="col-sm-9 fw-bold">@Model.Inmueble?.Direccion</dd>
 
@@ -23,6 +23,26 @@
             <dt class="col-sm-3 text-muted">Período</dt>
             <dd class="col-sm-9">Desde <strong>@Model.FechaInicio.ToString("dd/MM/yyyy")</strong> hasta <strong>@Model.FechaFin.ToString("dd/MM/yyyy")</strong></dd>
 
+            @if (Model.FechaFinalizacion.HasValue)
+            {
+                <dt class="col-sm-3 text-muted">Fin efectivo (exclusivo)</dt>
+                <dd class="col-sm-9">@Model.FechaFinalizacion.Value.ToString("dd/MM/yyyy")</dd>
+            }
+            @if (User.IsInRole("Administrador"))
+            {
+                <dt class="col-sm-3 text-muted">Creada por</dt>
+                <dd class="col-sm-9">@(Model.CreadoPor?.NombreCompleto ?? Model.CreadoPorId?.ToString() ?? "Sin registro histórico")</dd>
+                @if (Model.FinalizadoPorId.HasValue)
+                {
+                    <dt class="col-sm-3 text-muted">Finalización registrada por</dt>
+                    <dd class="col-sm-9">@(Model.FinalizadoPor?.NombreCompleto ?? Model.FinalizadoPorId.ToString())</dd>
+                }
+                @if (Model.AnuladoPorId.HasValue)
+                {
+                    <dt class="col-sm-3 text-muted">Anulada por</dt>
+                    <dd class="col-sm-9">@(Model.AnuladoPor?.NombreCompleto ?? Model.AnuladoPorId.ToString())</dd>
+                }
+            }
             <dt class="col-sm-3 text-muted">Monto por dia</dt>
             <dd class="col-sm-9 text-success fw-bold">$ @Model.MontoPorDia.ToString("N2")</dd>
 
@@ -34,9 +54,13 @@
 
 <div class="mt-4">
     <a asp-controller="Pagos" asp-action="Index" asp-route-reservaId="@Model.Id" class="btn btn-primary me-2">Ver Pagos</a>
-    @if (Model.EstadoActivo)
+    @if (Model.EstadoActivo && !Model.FechaFinalizacion.HasValue)
     {
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+    }
+    @if (Model.EstadoActivo && !Model.FechaFinalizacion.HasValue && Model.FechaFin.Date > DateTime.Today)
+    {
+        <a asp-action="Finalizar" asp-route-id="@Model.Id" class="btn btn-outline-warning">Finalizar anticipadamente</a>
     }
     <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
 </div>

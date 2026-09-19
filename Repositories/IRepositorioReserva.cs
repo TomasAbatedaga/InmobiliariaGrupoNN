@@ -10,6 +10,7 @@ namespace InmobiliariaGrupoNN.Repositories
         Reserva? ObtenerPorId(int id);
         int Alta(Reserva reserva);
         int Modificacion(Reserva reserva);
+        int Finalizar(int id, DateTime fechaFinalizacion, int usuarioId);
         int Baja(int id, int? anuladoPorId);
     }
 }

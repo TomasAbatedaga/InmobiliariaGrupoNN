@@ -16,6 +16,11 @@ namespace InmobiliariaGrupoNN.Models
         public decimal MontoTotal => (FechaFin - FechaInicio).Days * MontoPorDia;
         public Inmueble? Inmueble { get; set; }
         public Inquilino? Inquilino { get; set; }
+        [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+        public DateTime? FechaFinalizacion { get; set; }
+        [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+        public int? FinalizadoPorId { get; set; }
+        public Usuario? FinalizadoPor { get; set; }
         public int? CreadoPorId { get; set; }
         [ForeignKey("CreadoPorId")]
         public Usuario? CreadoPor { get; set; }

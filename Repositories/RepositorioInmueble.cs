@@ -20,7 +20,7 @@ namespace InmobiliariaGrupoNN.Repositories
             if (numeroPagina < 1) numeroPagina = 1;
             if (tamanio < 1) tamanio = 10;
 
-            int offset = (numeroPagina - 1) * tamanio;
+            long offset = ((long)numeroPagina - 1) * tamanio;
             var inmuebles = new List<Inmueble>();
 
             using (var connection = new MySqlConnection(_connectionString))
@@ -101,7 +101,8 @@ namespace InmobiliariaGrupoNN.Repositories
                   WHERE r.InmuebleId = i.Id
                     AND r.EstadoActivo = TRUE
                     AND r.FechaInicio < @FechaFin
-                    AND r.FechaFin > @FechaInicio
+                    AND COALESCE(r.FechaFinalizacion, r.FechaFin) > @FechaInicio
+                    AND COALESCE(r.FechaFinalizacion, r.FechaFin) > r.FechaInicio
               )";
 
         public IList<Inmueble> BuscarDisponibles(DateTime fechaInicio, DateTime fechaFin,
